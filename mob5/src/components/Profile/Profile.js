@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, Image, Text, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
-import LoginForm from './LoginForm';
+import { onSignOut } from '../../auth';
 
 const styles = StyleSheet.create({
   container: {
@@ -23,6 +23,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.9
   },
+  alrdyMb: {
+    color: '#FFF',
+    marginBottom: 1,
+    width: 160,
+    textAlign: 'center',
+    opacity: 0.9
+  },
   buttonContainer: {
     backgroundColor: '#2980b9',
     paddingVertical: 15
@@ -34,10 +41,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default class LoginScreen extends React.Component {
-  static navigationOptions = {
-  title: 'Login',
-  }
+export default class ProfileScreen extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
     return (
@@ -47,14 +51,15 @@ export default class LoginScreen extends React.Component {
             style={styles.logo}
             source={require('../../images/logo.png')}
           />
-          <Text style={styles.title}> blablabla login page </Text>
+        <Text style={styles.title}> blablabla profile page </Text>
         </View>
         <View style={styles.formContainer}>
-          <LoginForm navigate={this.props.navigation}/>
         </View>
         <TouchableOpacity style={styles.buttonContainer}
-          onPress={() => navigate("Register")}>
-          <Text style={styles.buttonText}> no account yet ? </Text>
+          onPress={() => {
+            onSignOut().then(() => navigate("SignedOut"));
+          }}>
+          <Text style={styles.buttonText}> Log Out ! </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     )

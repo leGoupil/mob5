@@ -1,8 +1,10 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, StatusBar } from 'react-native';
+import { onSignIn } from '../../auth';
 
 export default class LoginForm extends Component {
   render() {
+    const { navigate } = this.props.navigate;
     return (
       <View style={styles.container}>
         <StatusBar
@@ -28,8 +30,11 @@ export default class LoginForm extends Component {
         style={styles.input}
         ref={(input) => this.passwordInput = input}
         />
-        <TouchableOpacity style={styles.buttonContainer}>
-          <Text style={styles.buttonText}>LOGIN</Text>
+        <TouchableOpacity style={styles.buttonContainer}
+          onPress={() => {
+            onSignIn().then(() => navigate("SignedIn"));
+          }}>
+          <Text style={styles.buttonText}> LOGIN </Text>
         </TouchableOpacity>
       </View>
     )
