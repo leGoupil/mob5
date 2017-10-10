@@ -1,21 +1,73 @@
 import React, {Component} from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, StatusBar } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, TextInput, Text, TouchableOpacity, StatusBar } from 'react-native';
 import { onSignIn } from '../../auth';
 
 export default class RegisterForm extends Component {
-  // export default ({ navigation }) => (
+  constructor(props) {
+    super(props);
+    this.state = {
+      isLoading: false,
+      password: null,
+      confirmPassword: null,
+      username: null
+    }
+  }
+
+  _onPressButton = () => {
+  if(!this.state.password || !this.state.confirmPassword || !this.state.username){
+    return null;
+  }
+  if(this.state.password !== this.state.confirmPassword){
+    return null;
+  }
+  this.setState({
+    isLoading: true,
+  });
+  return fetch('http://another-calendar.herokuapp.com/api/v1/auth', {
+    method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: this.state.username,
+        password: this.state.password,
+        password_confirmation: this.state.confirmPassword
+      })
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      if(responseJson.status === 'error'){
+        return this.setState({
+          isLoading: false,
+        }, function () {
+          alert(JSON.stringify(responseJson.errors));
+        });
+      }
+
+      this.setState({
+        isLoading: false,
+      }, function () {
+        const { navigate } = this.props.navigate;
+        onSignIn(responseJson.data).then(() => navigate("SignedIn"));
+      });
+    })
+    .catch((error) => {
+      alert(JSON.stringify(error));
+      console.error(error);
+    });
+};
+
   render() {
-    const { navigate } = this.props.navigate;
     return (
       <View style={styles.container}>
-        <StatusBar
-          barStyle="light-content"
-          />
         <TextInput
           placeholder="username or email"
           placeholderTextColor="rgba(255,255,255,0.7)"
           returnKeyType="next"
           onSubmitEditing={() => this.passwordInput.focus()}
+          value={this.state.username}
+          onChangeText={(username) => this.setState({username})}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
@@ -26,6 +78,8 @@ export default class RegisterForm extends Component {
           placeholderTextColor="rgba(255,255,255,0.7)"
           returnKeyType="next"
           onSubmitEditing={() => this.confirmPasswordInput.focus()}
+          value={this.state.password}
+          onChangeText={(password) => this.setState({password})}
           secureTextEntry
           autoCapitalize="none"
           autoCorrect={false}
@@ -36,6 +90,8 @@ export default class RegisterForm extends Component {
           placeholder="confirm password"
           placeholderTextColor="rgba(255,255,255,0.7)"
           returnKeyType="done"
+          value={this.state.confirmPassword}
+          onChangeText={(confirmPassword) => this.setState({confirmPassword})}
           secureTextEntry
           autoCapitalize="none"
           autoCorrect={false}
@@ -43,9 +99,7 @@ export default class RegisterForm extends Component {
           ref={(input) => this.confirmPasswordInput = input}
           />
         <TouchableOpacity style={styles.buttonContainer}
-          onPress={() => {
-            onSignIn().then(() => navigate("SignedIn"));
-        }}>
+          onPress={this._onPressButton}>
           <Text style={styles.buttonText}> REGISTER </Text>
         </TouchableOpacity>
       </View>
@@ -74,3 +128,8 @@ const styles = StyleSheet.create({
     fontWeight: '700'
   }
 });
+
+
+// <StatusBar
+//   barStyle="light-content"
+//   />

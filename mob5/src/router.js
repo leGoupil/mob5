@@ -6,7 +6,9 @@ import { FontAwesome } from "react-native-vector-icons";
 import Register from "./components/Register/Register";
 import Login from "./components/Login/Login";
 import Home from "./components/Home/Home";
+import Contacts from "./components/Contacts/Contacts";
 import Profile from "./components/Profile/Profile";
+import EditCalendar from "./components/EditCalendar/EditCalendar";
 
 const headerStyle = {
   marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
@@ -34,9 +36,17 @@ export const SignedIn = TabNavigator(
     Home: {
       screen: Home,
       navigationOptions: {
-        tabBarLabel: "Home",
+        tabBarLabel: "Calendars",
         tabBarIcon: ({ tintColor }) =>
-          <FontAwesome name="home" size={30} color={tintColor} />
+          <FontAwesome name="calendar" size={30} color={tintColor} />
+      }
+    },
+    Contacts: {
+      screen: Contacts,
+      navigationOptions: {
+        tabBarLabel: "Contacts",
+        tabBarIcon: ({ tintColor }) =>
+          <FontAwesome name="address-book" size={30} color={tintColor} />
       }
     },
     Profile: {
@@ -71,7 +81,8 @@ export const createRootNavigator = (signedIn = false) => {
         navigationOptions: {
           gesturesEnabled: false
         }
-      }
+      },
+      EditCalendar: { screen: EditCalendar }
     },
     {
       headerMode: "none",

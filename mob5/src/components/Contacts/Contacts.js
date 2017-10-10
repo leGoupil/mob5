@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, AppRegistry, Text } from 'react-native';
-import CalendarList from './CalendarList/CalendarList';
+import ContactList from './ContactList/ContactList';
 
 const styles = StyleSheet.create({
   container: {
@@ -11,11 +11,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export default class HomeScreen extends React.Component {
+export default class ContactScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <CalendarList navigate={this.props.navigation}/>
+        <ContactList navigate={this.props.navigation}/>
       </View>
     );
   }
