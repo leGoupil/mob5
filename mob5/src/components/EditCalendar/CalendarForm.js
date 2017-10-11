@@ -44,11 +44,13 @@ export default class CalendarForm extends Component {
         })
       })
   })
+  // .then((response) => response.json())
   .then((response) => {
     console.log('response', response);
     const responseHeaders = response.headers.map;
-    const responseBody = JSON.parse(response._bodyText).data;
-    if(responseBody.status === 'error'){
+    const responseBody = JSON.parse(response._bodyText);
+    console.log('responseBody', responseBody);
+    if(responseBody.errors.length > 0){
       return this.setState({
         isLoading: false,
       }, function () {
