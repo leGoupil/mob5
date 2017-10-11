@@ -20,6 +20,10 @@ export default class LoginForm extends Component {
   this.setState({
     isLoading: true,
   });
+  let accessToken = null
+  , client = null
+  uid = null;
+
   return fetch('http://another-calendar.herokuapp.com/api/v1/auth/sign_in', {
     method: 'POST',
       headers: {
@@ -41,28 +45,23 @@ export default class LoginForm extends Component {
           alert(JSON.stringify(responseBody.errors));
         });
       }
-      console.log('responseBody.email', responseBody.email);
-      console.log('responseHeaders.client[0]', responseHeaders.client[0]);
-      console.log('responseHeaders[access-token][0]', responseHeaders['access-token'][0]);
+      client = responseHeaders.client[0];
+      uid = responseBody.email;
+      access_token = responseHeaders['access-token'][0];
       return fetch('http://another-calendar.herokuapp.com/api/v1/auth/validate_token', {
         method: 'GET',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            email: responseBody.email,
-            client: responseHeaders.client[0],
-            access_token: responseHeaders['access-token'][0]
+            uid,
+            client,
+            access_token
           },
-          // body: JSON.stringify({
-          //   email: responseBody.email,
-          //   client: responseHeaders.client[0],
-          //   access_token: responseHeaders['access-token'][0]
-          // })
         })
     })
     // .then((response) => response.json())
-    .then((response) => {
-      console.log('znfpojzpfhj', response);
+    .then((responseJson) => {
+      console.log('reeeess', responseJson);
       if(responseJson.status === 'error'){
         return this.setState({
           isLoading: false,
@@ -70,12 +69,11 @@ export default class LoginForm extends Component {
           alert(JSON.stringify(responseJson.errors));
         });
       }
-      console.log('zijizj', responseJson.data);
       this.setState({
         isLoading: false,
       }, function () {
         const { navigate } = this.props.navigate;
-        onSignIn(responseJson.data).then(() => navigate("SignedIn"));
+        onSignIn({uid, client, access_token}).then(() => navigate("SignedIn"));
       });
     })
     .catch((error) => {
@@ -98,6 +96,7 @@ export default class LoginForm extends Component {
         onSubmitEditing={() => this.passwordInput.focus()}
         value={this.state.username}
         onChangeText={(username) => this.setState({username})}
+        disabled={this.state.isLoading}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
@@ -109,6 +108,7 @@ export default class LoginForm extends Component {
         returnKeyType="go"
         value={this.state.password}
         onChangeText={(password) => this.setState({password})}
+        disabled={this.state.isLoading}
         secureTextEntry
         autoCapitalize="none"
         autoCorrect={false}
@@ -116,6 +116,7 @@ export default class LoginForm extends Component {
         ref={(input) => this.passwordInput = input}
         />
         <TouchableOpacity style={styles.buttonContainer}
+          disabled={this.state.isLoading}
           onPress={this._onPressButton}>
           <Text style={styles.buttonText}> LOGIN </Text>
         </TouchableOpacity>

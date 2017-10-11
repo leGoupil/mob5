@@ -36,11 +36,9 @@ const styles = StyleSheet.create({
 });
 
 export default class EditCalendar extends React.Component {
-  // static navigationOptions = {
-  // title: 'Login',
-  // }
   render() {
     const { navigate } = this.props.navigation;
+    const { calendar } = this.props || {};
     return (
       <KeyboardAvoidingView behavior="padding" style={styles.container}>
         <View style={styles.logoContainer}>
@@ -51,11 +49,11 @@ export default class EditCalendar extends React.Component {
         <Text style={styles.title}> Ajouter un calendrier </Text>
         </View>
         <View style={styles.formContainer}>
-          <CalendarForm navigate={this.props.navigation}/>
+          <CalendarForm calendar={calendar} navigate={this.props.navigation}/>
         </View>
         <TouchableOpacity style={styles.buttonContainer}
           onPress={() => navigate("Home")}>
-          <Text style={styles.buttonText}> no account yet ? </Text>
+          <Text style={styles.buttonText}> Retour</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     )

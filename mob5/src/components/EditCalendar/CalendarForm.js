@@ -1,11 +1,67 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, StatusBar } from 'react-native';
 import CustomMultiPicker from "react-native-multiple-select-list";
+import { getToken } from '../../auth';
 
 export default class CalendarForm extends Component {
-  logChange(val) {
-    console.log("Selected: " + JSON.stringify(val));
+  constructor(props) {
+    super(props);
+    this.state = {
+      isLoading: false,
+      title: null,
+      description: null,
+      userList: [],
+      pictureUrl: null
+    }
   }
+
+  _onPressButton = () => {
+  if(!this.state.title || !this.state.description){
+    return null;
+  }
+  console.log('coucou :)', this.state);
+  this.setState({
+    isLoading: true,
+  });
+  console.log('GETTOKEN', getToken);
+  return getToken()
+  .then((bulkAccess) => {
+    console.log('bulkAccess', bulkAccess);
+    const objAccess = JSON.parse(bulkAccess);
+    console.log('objAccess', objAccess);
+    return fetch('http://another-calendar.herokuapp.com/api/v1/calendar', {
+      method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          uid: bulkAccess.uid,
+          client: bulkAccess.client,
+          access_token: bulkAccess.access_token
+        },
+        body: JSON.stringify({
+          title: this.state.title,
+          // description: this.state.password
+        })
+      })
+  })
+  .then((response) => {
+    console.log('response', response);
+    const responseHeaders = response.headers.map;
+    const responseBody = JSON.parse(response._bodyText).data;
+    if(responseBody.status === 'error'){
+      return this.setState({
+        isLoading: false,
+      }, function () {
+        alert(JSON.stringify(responseBody.errors));
+      });
+    }
+  })
+  .catch((error) => {
+    alert(JSON.stringify(error));
+    console.error(error);
+  });
+};
+
   userList = {
     "123":"Tom",
     "124":"Michael",
@@ -14,6 +70,7 @@ export default class CalendarForm extends Component {
 
   render() {
     const { navigate } = this.props.navigate;
+    const { calendar } = this.props || {};
     return (
       <View style={styles.container}>
         <StatusBar
@@ -24,6 +81,8 @@ export default class CalendarForm extends Component {
         placeholderTextColor="rgba(255,255,255,0.7)"
         returnKeyType="next"
         onSubmitEditing={() => this.passwordInput.focus()}
+        value={this.state.title}
+        onChangeText={(title) => this.setState({title})}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
@@ -33,6 +92,8 @@ export default class CalendarForm extends Component {
         placeholder="Description"
         placeholderTextColor="rgba(255,255,255,0.7)"
         returnKeyType="go"
+        value={this.state.description}
+        onChangeText={(description) => this.setState({description})}
         secureTextEntry
         autoCapitalize="none"
         autoCorrect={false}
@@ -41,14 +102,16 @@ export default class CalendarForm extends Component {
         />
         <CustomMultiPicker
           options={this.userList}
-          search={true} // should show search bar?
-          multiple={true} //
+          search={true}
+          multiple={true}
           placeholder={"Ajouter des amis a ce calendrier"}
           placeholderTextColor={'rgba(255,255,255,0.7)'}
           returnValue={"label"} // label or value
           callback={(res)=>{ console.log(res) }} // callback, array of selected items
           rowBackgroundColor={"#eee"}
           rowHeight={40}
+          value={this.state.userList}
+          callback={(userList) => this.setState({userList})}
           rowRadius={5}
           iconColor={"#00a2dd"}
           iconSize={30}
@@ -59,10 +122,8 @@ export default class CalendarForm extends Component {
         />
 
         <TouchableOpacity style={styles.buttonContainer}
-          onPress={() => {
-            onSignIn().then(() => navigate("SignedIn"));
-          }}>
-          <Text style={styles.buttonText}> LOGIN </Text>
+          onPress={this._onPressButton}>
+          <Text style={styles.buttonText}> Ajouter calendrier </Text>
         </TouchableOpacity>
       </View>
     )

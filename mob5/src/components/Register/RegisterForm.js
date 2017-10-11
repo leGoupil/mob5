@@ -67,6 +67,7 @@ export default class RegisterForm extends Component {
           returnKeyType="next"
           onSubmitEditing={() => this.passwordInput.focus()}
           value={this.state.username}
+          disabled={this.state.isLoading}
           onChangeText={(username) => this.setState({username})}
           keyboardType="email-address"
           autoCapitalize="none"
@@ -77,6 +78,7 @@ export default class RegisterForm extends Component {
           placeholder="password"
           placeholderTextColor="rgba(255,255,255,0.7)"
           returnKeyType="next"
+          disabled={this.state.isLoading}
           onSubmitEditing={() => this.confirmPasswordInput.focus()}
           value={this.state.password}
           onChangeText={(password) => this.setState({password})}
@@ -87,6 +89,7 @@ export default class RegisterForm extends Component {
           ref={(input) => this.passwordInput = input}
           />
         <TextInput
+          disabled={this.state.isLoading}
           placeholder="confirm password"
           placeholderTextColor="rgba(255,255,255,0.7)"
           returnKeyType="done"
@@ -99,6 +102,7 @@ export default class RegisterForm extends Component {
           ref={(input) => this.confirmPasswordInput = input}
           />
         <TouchableOpacity style={styles.buttonContainer}
+          disabled={this.state.isLoading}
           onPress={this._onPressButton}>
           <Text style={styles.buttonText}> REGISTER </Text>
         </TouchableOpacity>
