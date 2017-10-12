@@ -3,41 +3,15 @@ import { StyleSheet, View, TextInput, Text, TouchableOpacity, StatusBar } from '
 import CustomMultiPicker from "react-native-multiple-select-list";
 import { getToken } from '../../auth';
 
-export default class CalendarForm extends Component {
+export default class FriendForm extends Component {
   constructor(props) {
     super(props);
     this.state = {
       isLoading: false,
       title: null,
       description: null,
-      private: null,
       userList: [],
       pictureUrl: null
-    }
-  }
-  componentDidMount() {
-    let editCalendar = null;
-    console.log('this.props', this.props);
-    if(this.props.navigate){
-      const nav = this.props.navigate;
-      if(nav.state){
-        if(nav.state.params){
-          if(nav.state.params.data){
-            editCalendar = nav.state.params.data;
-            console.log('paaraaams', nav.state.params);
-          }
-        }
-      }
-    }
-    if(editCalendar){
-      return this.setState({
-        id: editCalendar.id,
-        title: editCalendar.title,
-        description: editCalendar.description || null,
-        userList: editCalendar.userList || [],
-        pictureUrl: editCalendar.pictureUrl || null,
-        private: editCalendar.private
-      });
     }
   }
 
@@ -56,29 +30,21 @@ export default class CalendarForm extends Component {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          uid: objAccess.uid,
-          client: objAccess.client,
-          expiry: objAccess.expiry,
-          access_token: objAccess.access_token
+          uid: bulkAccess.uid,
+          client: bulkAccess.client,
+          access_token: bulkAccess.access_token
         },
         body: JSON.stringify({
           title: this.state.title,
-          private: true,
-          id: 3
+          // description: this.state.password
         })
       })
   })
+  // .then((response) => response.json())
   .then((response) => {
     const responseHeaders = response.headers.map;
     const responseBody = JSON.parse(response._bodyText);
-    if(responseBody.error){
-      return this.setState({
-        isLoading: false,
-      }, function () {
-        alert(JSON.stringify(responseBody.error));
-      });
-    }
-    if(responseBody.errors){
+    if(responseBody.errors.length > 0){
       return this.setState({
         isLoading: false,
       }, function () {
@@ -100,8 +66,7 @@ export default class CalendarForm extends Component {
 
   render() {
     const { navigate } = this.props.navigate;
-    // const { calendar } = this.props.calendar || this.state.calendar;
-    // this.setState({calendar})
+    const { friends } = this.props || {};
     return (
       <View style={styles.container}>
         <StatusBar
@@ -115,7 +80,6 @@ export default class CalendarForm extends Component {
         value={this.state.title}
         onChangeText={(title) => this.setState({title})}
         keyboardType="email-address"
-        disabled={this.state.isLoading}
         autoCapitalize="none"
         autoCorrect={false}
         style={styles.input}
@@ -124,7 +88,6 @@ export default class CalendarForm extends Component {
         placeholder="Description"
         placeholderTextColor="rgba(255,255,255,0.7)"
         returnKeyType="go"
-        disabled={this.state.isLoading}
         value={this.state.description}
         onChangeText={(description) => this.setState({description})}
         secureTextEntry
@@ -155,8 +118,7 @@ export default class CalendarForm extends Component {
         />
 
         <TouchableOpacity style={styles.buttonContainer}
-          onPress={this._onPressButton}
-          disabled={this.state.isLoading}>
+          onPress={this._onPressButton}>
           <Text style={styles.buttonText}> Ajouter calendrier </Text>
         </TouchableOpacity>
       </View>

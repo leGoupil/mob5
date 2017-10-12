@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, Image, Text, KeyboardAvoidingView, TouchableOpacity, ScrollView } from 'react-native';
-import CalendarForm from './CalendarForm';
+import FriendForm from './FriendForm';
 
 
 const styles = StyleSheet.create({
@@ -35,11 +35,10 @@ const styles = StyleSheet.create({
   }
 });
 
-export default class EditCalendar extends React.Component {
+export default class EditFriend extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
-    // console.log('thuhqafiuh PLOP', this.props.navigation);
-    // const { calendar } = this.props.navigation.state.params.data|| {};
+    const { friends } = this.props || {};
     return (
       <KeyboardAvoidingView behavior="padding" style={styles.container}>
         <View style={styles.logoContainer}>
@@ -47,10 +46,10 @@ export default class EditCalendar extends React.Component {
             style={styles.logo}
             source={require('../../images/logo.png')}
           />
-        <Text style={styles.title}> Ajouter un calendrier </Text>
+        <Text style={styles.title}> Ajouter un ami </Text>
         </View>
         <View style={styles.formContainer}>
-          <CalendarForm navigate={this.props.navigation}/>
+          <FriendForm friends={friends} navigate={this.props.navigation}/>
         </View>
         <TouchableOpacity style={styles.buttonContainer}
           onPress={() => navigate("Home")}>

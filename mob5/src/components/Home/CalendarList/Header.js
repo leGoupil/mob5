@@ -2,13 +2,6 @@ import React, {Component} from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 const styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   padding: 8,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: '#C1C1C1',
-  // },
   container: {
     flex: 1,
     padding: 8,
@@ -26,14 +19,6 @@ const styles = StyleSheet.create({
     color: '#8E8E8E',
   },
 });
-
-// export default Header = (props) => (
-//   <View style={styles.container}>
-//     <TouchableOpacity style={styles.button} onPress={() => navigate("EditCalendar")}>
-//       <Text style={styles.text}>Ajouter un calendrier</Text>
-//     </TouchableOpacity>
-//   </View>
-// );
 
 export default class Header extends Component {
   render() {

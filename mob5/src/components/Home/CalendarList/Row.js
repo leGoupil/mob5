@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Swipeable from 'react-native-swipeable';
 import { FontAwesome } from "react-native-vector-icons";
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -41,37 +40,50 @@ export default class Row extends Component {
       isOpen: null
     };
   }
-  _onPressButton() {
-    // this.setState({isOpen: true});
-  }
+
+  removeCalendar = () => {
+    console.log('muhahaha');
+  };
 
   render(){
+    const {currentlyOpenSwipeable} = this.state;
+    const { navigate } = this.props.navigate;
     const { data } = this.props;
+    // const { onOpen, onClose, editCalendar, deleteCalendar } = this.props.itemProps;
     const { onOpen, onClose } = this.props.itemProps;
-
+    const editCalendar = () => {
+      // currentlyOpenSwipeable.recenter();
+      navigate('EditCalendar', {data});
+    };
+    const deleteCalendar = () => {
+      // currentlyOpenSwipeable.recenter();
+      this.removeCalendar();
+    }
     return(
       <Swipeable
         rightButtons={[
-          <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: 'red'}]}>
+          <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: 'red'}]}
+            onPress={deleteCalendar}
+          >
             <FontAwesome name="trash-o" size={30} color={'white'} />
           </TouchableOpacity>,
           <TouchableOpacity
-            onPress={this._onPressButton}
+            onPress={editCalendar}
             style={[styles.rightSwipeItem, {backgroundColor: 'orange'}]}>
             <FontAwesome name="edit" size={30} color={'white'} />
           </TouchableOpacity>
         ]}
-        onRightButtonsOpenRelease={onOpen}
-        onRightButtonsCloseRelease={onClose}
       >
 
         <View style={styles.container}>
-          <Image source={{ uri: data.picture.large}} style={styles.photo} />
+          <Image source={{ uri: data.picture || 'https://www.broomfield.org/images/pages/N1446/blue%20heading%20icons_calendar.png'}} style={styles.photo} />
           <Text style={styles.text}>
-            {`${data.name.first} ${data.name.last}`}
+            {`${data.title}`}
           </Text>
         </View>
       </Swipeable>
     )
   }
 }
+
+// {`${data.title} ${data.name.last}`}

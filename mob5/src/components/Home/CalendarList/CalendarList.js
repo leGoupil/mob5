@@ -4,58 +4,91 @@ import Row from './Row';
 import Header from './Header';
 import SectionHeader from './SectionHeader';
 import Footer from './Footer';
-import datalist from './data'
+// import datalist from './data'
+import { getToken } from '../../../auth';
 
 
 export default class CalendarList extends React.Component {
-  formatData(data) {
-   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentlyOpenSwipeable: null,
+      dataList: []
+    }
+  }
+  formatData() {
+    const data = this.state.dataList
+    , alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+    , dataBlob = {}
+    , sectionIds = []
+    , rowIds = [];
 
-   const dataBlob = {};
-   const sectionIds = [];
-   const rowIds = [];
-
-   for (let sectionId = 0; sectionId < alphabet.length; sectionId++) {
-     const currentChar = alphabet[sectionId];
-     const users = data.filter((user) => user.name.first.toUpperCase().indexOf(currentChar) === 0);
-     if (users.length > 0) {
-       sectionIds.push(sectionId);
-        dataBlob[sectionId] = { character: currentChar };
-        rowIds.push([]);
-        for (let i = 0; i < users.length; i++) {
-          const rowId = `${sectionId}:${i}`;
-          rowIds[rowIds.length - 1].push(rowId);
-          dataBlob[rowId] = users[i];
+    if(data.length > 0) {
+      for (let sectionId = 0; sectionId < alphabet.length; sectionId++) {
+        const currentChar = alphabet[sectionId];
+        const calendars = data.filter((calendar) => calendar.title.toUpperCase().indexOf(currentChar) === 0);
+        if (calendars.length > 0) {
+          sectionIds.push(sectionId);
+          dataBlob[sectionId] = { character: currentChar };
+          rowIds.push([]);
+          for (let i = 0; i < calendars.length; i++) {
+            const rowId = `${sectionId}:${i}`;
+            rowIds[rowIds.length - 1].push(rowId);
+            dataBlob[rowId] = calendars[i];
+          }
         }
       }
     }
     return { dataBlob, sectionIds, rowIds };
   }
 
-  state = {
-      currentlyOpenSwipeable: null
-   };
-   handleScroll = () => {
-     const {currentlyOpenSwipeable} = this.state;
+  componentDidMount() {
+    return getToken()
+    .then((bulkAccess) => {
+      const objAccess = JSON.parse(bulkAccess);
+      return fetch('http://another-calendar.herokuapp.com/api/v1/calendar', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          uid: objAccess.uid,
+          client: objAccess.client,
+          expiry: objAccess.expiry,
+          access_token: objAccess.access_token
+        }
+      })
+    })
+    .then((response) => {
+      const responseHeaders = response.headers.map;
+      const responseBody = JSON.parse(response._bodyText);
+      if(responseBody.error){
+        return this.setState({
+          isLoading: false
+        }, function () {
+          alert(JSON.stringify(responseBody.error));
+        });
+      }
+      return this.setState({
+        isLoading: false,
+        dataList: responseBody.data
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }
 
-     if (currentlyOpenSwipeable) {
-       currentlyOpenSwipeable.recenter();
-     }
-   };
+  handleScroll = () => {
+    const {currentlyOpenSwipeable} = this.state;
+    if (currentlyOpenSwipeable) {
+      currentlyOpenSwipeable.recenter();
+    }
+  };
 
 
   render() {
     const { navigate } = this.props.navigate;
     const {currentlyOpenSwipeable} = this.state;
-    const itemProps = {
-      onOpen: (event, gestureState, swipeable) => {
-        if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
-          currentlyOpenSwipeable.recenter();
-        }
-        this.setState({currentlyOpenSwipeable: swipeable});
-      },
-      onClose: () => this.setState({currentlyOpenSwipeable: null})
-    };
     const getSectionData = (dataBlob, sectionId) => dataBlob[sectionId];
     const getRowData = (dataBlob, sectionId, rowId) => dataBlob[`${rowId}`];
     const ds = new ListView.DataSource({
@@ -64,10 +97,30 @@ export default class CalendarList extends React.Component {
       getSectionData,
       getRowData,
     });
-    const { dataBlob, sectionIds, rowIds } = this.formatData(datalist);
+    const { dataBlob, sectionIds, rowIds } = this.formatData();
     this.state = {
+      dataList: [],
       currentlyOpenSwipeable: null,
       dataSource: ds.cloneWithRowsAndSections(dataBlob, sectionIds, rowIds),
+    };
+    const itemProps = {
+      onOpen: (event, gestureState, swipeable) => {
+        if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
+          currentlyOpenSwipeable.recenter();
+        }
+        this.setState({currentlyOpenSwipeable: swipeable});
+      },
+      onClose: (event, gestureState, swipeable) => {
+        console.log('plop?');
+        this.setState({currentlyOpenSwipeable: null})
+      },
+      editCalendar: (calendar) => {
+        navigate('EditCalendar');
+      },
+      deleteCalendar: (calendar) => {
+        console.log('alnfizhn', calendar);
+        navigate('EditCalendar');
+      }
     };
 
     return (
@@ -75,25 +128,28 @@ export default class CalendarList extends React.Component {
         style={styles.container}
         onScroll={this.handleScroll}
         dataSource={this.state.dataSource}
-        renderRow={(data) => <Row data={data} itemProps={itemProps} />}
+        renderRow={(data) => <Row
+          navigate={this.props.navigate}
+          data={data}
+          itemProps={itemProps}/>}
         renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}
         renderHeader={() => <Header navigate={this.props.navigate}/>}
-        renderFooter={() => <Footer />}
         renderSectionHeader={(sectionData) => <SectionHeader {...sectionData} />}
-      />
+        />
     );
   }
 }
-
+// itemProps={itemProps}
+// renderFooter={() => <Footer />}
 const styles = StyleSheet.create({
   container: {
-  flex: 1,
-  marginTop: 20,
+    flex: 1,
+    marginTop: 20,
   },
   separator: {
-  flex: 1,
-  height: StyleSheet.hairlineWidth,
-  backgroundColor: '#8E8E8E',
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#8E8E8E',
   },
   sectionHeader: {
     paddingTop: 2,

@@ -9,6 +9,7 @@ import Home from "./components/Home/Home";
 import Contacts from "./components/Contacts/Contacts";
 import Profile from "./components/Profile/Profile";
 import EditCalendar from "./components/EditCalendar/EditCalendar";
+import EditFriend from "./components/EditFriend/EditFriend";
 
 const headerStyle = {
   marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
@@ -82,7 +83,8 @@ export const createRootNavigator = (signedIn = false) => {
           gesturesEnabled: false
         }
       },
-      EditCalendar: { screen: EditCalendar }
+      EditCalendar: { screen: EditCalendar },
+      EditFriend: { screen: EditFriend }
     },
     {
       headerMode: "none",

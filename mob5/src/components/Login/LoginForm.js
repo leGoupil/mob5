@@ -20,9 +20,12 @@ export default class LoginForm extends Component {
   this.setState({
     isLoading: true,
   });
+
   let accessToken = null
   , client = null
-  uid = null;
+  , uid = null
+  , expiry = null
+  , errors = null;
 
   return fetch('http://another-calendar.herokuapp.com/api/v1/auth/sign_in', {
     method: 'POST',
@@ -37,16 +40,17 @@ export default class LoginForm extends Component {
     })
     .then((response) => {
       const responseHeaders = response.headers.map;
-      const responseBody = JSON.parse(response._bodyText).data;
-      if(responseBody.status === 'error'){
+      const responseBody = JSON.parse(response._bodyText);
+      if(responseBody.errors){
         return this.setState({
           isLoading: false,
         }, function () {
-          alert(JSON.stringify(responseBody.errors));
+          errors = responseBody.errors;
         });
       }
       client = responseHeaders.client[0];
-      uid = responseBody.email;
+      expiry = responseHeaders.expiry[0];
+      uid = responseBody.data.uid;
       access_token = responseHeaders['access-token'][0];
       return fetch('http://another-calendar.herokuapp.com/api/v1/auth/validate_token', {
         method: 'GET',
@@ -60,20 +64,35 @@ export default class LoginForm extends Component {
         })
     })
     // .then((response) => response.json())
-    .then((responseJson) => {
-      console.log('reeeess', responseJson);
-      if(responseJson.status === 'error'){
+    // .then((response) => {
+    //   console.log('response', response);
+    //   if(!response){
+    //     errors = 'Merci de verifier vos informations de connexions';
+    //   }
+    //   return response.json()
+    // })
+    .then((resp) => {
+      if(!resp){
         return this.setState({
           isLoading: false,
         }, function () {
-          alert(JSON.stringify(responseJson.errors));
+          alert(JSON.stringify(errors));
+        });
+      }
+      const responseHeaders = resp.headers.map;
+      const responseBody = JSON.parse(resp._bodyText);
+      if(responseBody.errors || errors){
+        return this.setState({
+          isLoading: false,
+        }, function () {
+          alert(JSON.stringify(responseBody.errors || errors));
         });
       }
       this.setState({
         isLoading: false,
       }, function () {
         const { navigate } = this.props.navigate;
-        onSignIn({uid, client, access_token}).then(() => navigate("SignedIn"));
+        onSignIn({uid, client, access_token, expiry}).then(() => navigate("SignedIn"));
       });
     })
     .catch((error) => {

@@ -27,13 +27,10 @@ export const getToken = () => {
   return new Promise((resolve, reject) => {
     AsyncStorage.getItem(USER_KEY)
       .then(res => {
-        console.log('uzhuhzfçuhza!fh', res);
         if (res !== null) {
-          console.log('RESOLVE FDP');
           resolve(res);
         } else {
           resolve(false);
-          console.log('RESOLVE 2 FDP')
         }
       })
       .catch(err => reject(err));

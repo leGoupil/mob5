@@ -1,52 +1,8 @@
-// import React from 'react';
-// import { View, Text, StyleSheet, Image } from 'react-native';
-//
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 12,
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   text: {
-//     marginLeft: 12,
-//     fontSize: 16,
-//   },
-//   photo: {
-//     height: 40,
-//     width: 40,
-//     borderRadius: 20,
-//   },
-// });
-//
-//
-// // export default Row;
-//
-// export default class Row extends React.Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       dataSource: props,
-//     };
-//     // const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-//     // this.state = {
-//     //   dataSource: ds.cloneWithRows(['row 1', 'row 2']),
-//     // };
-//   }
-//   render() {
-//     return (
-//       <View style={styles.container}>
-//         <Image source={{ uri: dataSource.picture.large}} style={styles.photo} />
-//         <Text style={styles.text}>
-//           {`${dataSource.name.first} ${dataSource.name.last}`}
-//         </Text>
-//       </View>
-//     );
-//   }
-// }
+import React, {Component} from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import Swipeable from 'react-native-swipeable';
+import { FontAwesome } from "react-native-vector-icons";
 
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
@@ -64,15 +20,58 @@ const styles = StyleSheet.create({
     width: 40,
     borderRadius: 20,
   },
+  leftSwipeItem: {
+    flex: 1,
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    paddingRight: 20
+  },
+  rightSwipeItem: {
+    flex: 1,
+    // alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: 25
+  }
 });
 
-export default Row = (props) => (
-  <View style={styles.container}>
-    <Image source={{ uri: props.picture.large}} style={styles.photo} />
-    <Text style={styles.text}>
-      {`${props.name.first} ${props.name.last}`}
-    </Text>
-  </View>
-);
+export default class Row extends Component {
+  constructor() {
+    super();
+    this.state = {
+      isOpen: null
+    };
+  }
+  _onPressButton() {
+    // this.setState({isOpen: true});
+  }
 
-// export default Row;
+  render(){
+    const { data } = this.props;
+    const { onOpen, onClose } = this.props.itemProps;
+
+    return(
+      <Swipeable
+        rightButtons={[
+          <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: 'red'}]}>
+            <FontAwesome name="trash-o" size={30} color={'white'} />
+          </TouchableOpacity>,
+          <TouchableOpacity
+            onPress={this._onPressButton}
+            style={[styles.rightSwipeItem, {backgroundColor: 'orange'}]}>
+            <FontAwesome name="edit" size={30} color={'white'} />
+          </TouchableOpacity>
+        ]}
+        onRightButtonsOpenRelease={onOpen}
+        onRightButtonsCloseRelease={onClose}
+      >
+
+        <View style={styles.container}>
+          <Image source={{ uri: data.picture.large}} style={styles.photo} />
+          <Text style={styles.text}>
+            {`${data.name.first} ${data.name.last}`}
+          </Text>
+        </View>
+      </Swipeable>
+    )
+  }
+}
