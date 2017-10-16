@@ -11,6 +11,7 @@ import Profile from "./components/Profile/Profile";
 import Group from "./components/Group/Group";
 import EditCalendar from "./components/EditCalendar/EditCalendar";
 import EditFriend from "./components/EditFriend/EditFriend";
+import EditGroup from "./components/EditGroup/EditGroup";
 
 const headerStyle = {
   marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
@@ -69,6 +70,8 @@ export const SignedIn = TabNavigator(
     }
   },
   {
+    lazy: true,
+    swipeEnabled: false,
     tabBarOptions: {
       style: {
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
@@ -93,7 +96,8 @@ export const createRootNavigator = (signedIn = false) => {
         }
       },
       EditCalendar: { screen: EditCalendar },
-      EditFriend: { screen: EditFriend }
+      EditFriend: { screen: EditFriend },
+      EditGroup: { screen: EditGroup }
     },
     {
       headerMode: "none",

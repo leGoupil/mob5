@@ -45,7 +45,6 @@ export default class RegisterForm extends Component {
     .then((response) => {
       const responseHeaders = response.headers.map;
       const responseBody = JSON.parse(response._bodyText);
-      console.log('responseBody', responseBody);
       if(responseBody.errors){
         return this.setState({
           isLoading: false,
@@ -57,9 +56,6 @@ export default class RegisterForm extends Component {
       expiry = responseHeaders.expiry[0];
       uid = responseBody.data.uid;
       access_token = responseHeaders['access-token'][0];
-      console.log('uid', uid);
-      console.log('client', client);
-      console.log('access_token', access_token);
       return fetch('http://another-calendar.herokuapp.com/api/v1/auth/validate_token', {
         method: 'GET',
           headers: {
@@ -72,7 +68,6 @@ export default class RegisterForm extends Component {
         })
     })
     .then((resp) => {
-      console.log('resp', resp);
       if(!resp){
         return this.setState({
           isLoading: false,
@@ -98,7 +93,6 @@ export default class RegisterForm extends Component {
     })
     .catch((error) => {
       alert(JSON.stringify(error));
-      console.error(error);
     });
 };
 

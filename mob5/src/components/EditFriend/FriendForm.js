@@ -39,6 +39,17 @@ export default class CalendarForm extends Component {
       })
   })
   .then((response) => {
+    console.log('add friend ?', response);
+    console.log('add friend ?', response.ok);
+    if(response){
+      if(!response.ok){
+        return this.setState({
+          isLoading: false,
+        }, function () {
+          alert(JSON.stringify(response._bodyText));
+        });
+      }
+    }
     const responseHeaders = response.headers.map;
     const responseBody = JSON.parse(response._bodyText);
     if(responseBody.error){
@@ -76,7 +87,6 @@ export default class CalendarForm extends Component {
         disabled={this.state.isLoading}
         value={this.state.description}
         onChangeText={(emailField) => this.setState({emailField})}
-        secureTextEntry
         autoCapitalize="none"
         autoCorrect={false}
         style={styles.input}

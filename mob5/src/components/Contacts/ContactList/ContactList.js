@@ -84,6 +84,7 @@ export default class CalendarList extends React.Component {
       })
     })
     .then((response) => {
+      console.log('response', response);
       const responseHeaders = response.headers.map;
       const responseBody = JSON.parse(response._bodyText);
       if(responseBody.error){
@@ -102,6 +103,7 @@ export default class CalendarList extends React.Component {
       console.error(error);
     });
   }
+
 
   handleScroll = () => {
     const {currentlyOpenSwipeable} = this.state;
@@ -141,7 +143,6 @@ export default class CalendarList extends React.Component {
         navigate('EditFriend');
       }
     };
-
     return (
       <ListView
         style={styles.container}

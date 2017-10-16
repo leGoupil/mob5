@@ -63,14 +63,6 @@ export default class LoginForm extends Component {
           },
         })
     })
-    // .then((response) => response.json())
-    // .then((response) => {
-    //   console.log('response', response);
-    //   if(!response){
-    //     errors = 'Merci de verifier vos informations de connexions';
-    //   }
-    //   return response.json()
-    // })
     .then((resp) => {
       if(!resp){
         return this.setState({
@@ -97,7 +89,6 @@ export default class LoginForm extends Component {
     })
     .catch((error) => {
       alert(JSON.stringify(error));
-      console.error(error);
     });
 };
 

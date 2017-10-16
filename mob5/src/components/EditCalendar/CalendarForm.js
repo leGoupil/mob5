@@ -52,7 +52,7 @@ export default class CalendarForm extends Component {
   return getToken()
   .then((bulkAccess) => {
     const objAccess = JSON.parse(bulkAccess);
-    return fetch('http://another-calendar.herokuapp.com/api/v1/user/calendars/3', {
+    return fetch('http://another-calendar.herokuapp.com/api/v1/user/calendars', {
       method: this.state.putOrPost,
         headers: {
           'Accept': 'application/json',
@@ -66,7 +66,7 @@ export default class CalendarForm extends Component {
           title: this.state.title,
           // description: this.state.description,
           private: true,
-          id: 4
+          id: 1
         })
       })
   })
