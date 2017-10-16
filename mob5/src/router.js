@@ -8,6 +8,7 @@ import Login from "./components/Login/Login";
 import Home from "./components/Home/Home";
 import Contacts from "./components/Contacts/Contacts";
 import Profile from "./components/Profile/Profile";
+import Group from "./components/Group/Group";
 import EditCalendar from "./components/EditCalendar/EditCalendar";
 import EditFriend from "./components/EditFriend/EditFriend";
 
@@ -37,7 +38,7 @@ export const SignedIn = TabNavigator(
     Home: {
       screen: Home,
       navigationOptions: {
-        tabBarLabel: "Calendars",
+        tabBarLabel: "Calendriers",
         tabBarIcon: ({ tintColor }) =>
           <FontAwesome name="calendar" size={30} color={tintColor} />
       }
@@ -45,9 +46,17 @@ export const SignedIn = TabNavigator(
     Contacts: {
       screen: Contacts,
       navigationOptions: {
-        tabBarLabel: "Contacts",
+        tabBarLabel: "Amis",
         tabBarIcon: ({ tintColor }) =>
           <FontAwesome name="address-book" size={30} color={tintColor} />
+      }
+    },
+    Group: {
+      screen: Group,
+      navigationOptions: {
+        tabBarLabel: "Groupes",
+        tabBarIcon: ({ tintColor }) =>
+          <FontAwesome name="group" size={30} color={tintColor} />
       }
     },
     Profile: {

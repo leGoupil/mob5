@@ -3,7 +3,7 @@ import { StyleSheet, View, TextInput, Text, TouchableOpacity, StatusBar } from '
 import CustomMultiPicker from "react-native-multiple-select-list";
 import { getToken } from '../../auth';
 
-export default class CalendarForm extends Component {
+export default class GroupForm extends Component {
   constructor(props) {
     super(props);
     this.state = {

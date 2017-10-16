@@ -42,7 +42,7 @@ export default class Row extends Component {
     };
   }
 
-  removeCalendar = () => {
+  removeGroup = () => {
     console.log('muhahaha');
   };
 
@@ -51,19 +51,26 @@ export default class Row extends Component {
     const { navigate } = this.props.navigate;
     const { data } = this.props;
     const { onOpen, onClose } = this.props.itemProps;
-    const deleteFriend = () => {
-      //refresh ?
-      this.removeCalendar();
+    const deleteGroup = () => {
+      this.removeGroup();
     }
-
+    const editGroup = () => {
+      // currentlyOpenSwipeable.recenter();
+      navigate('EditGroup', {data});
+    };
     return(
       <Swipeable
         rightButtons={[
           <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: 'red'}]}
-            onPress={deleteFriend}
+            onPress={deleteGroup}
           >
             <FontAwesome name="trash-o" size={30} color={'white'} />
           </TouchableOpacity>,
+          <TouchableOpacity
+            onPress={editGroup}
+            style={[styles.rightSwipeItem, {backgroundColor: 'orange'}]}>
+            <FontAwesome name="edit" size={30} color={'white'} />
+          </TouchableOpacity>
         ]}
       >
         <View style={styles.container}>

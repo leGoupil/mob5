@@ -4,7 +4,6 @@ import Row from './Row';
 import Header from './Header';
 import SectionHeader from './SectionHeader';
 import Footer from './Footer';
-// import datalist from './data'
 import { getToken } from '../../../auth';
 
 
@@ -46,7 +45,7 @@ export default class CalendarList extends React.Component {
     return getToken()
     .then((bulkAccess) => {
       const objAccess = JSON.parse(bulkAccess);
-      return fetch('http://another-calendar.herokuapp.com/api/v1/calendar', {
+      return fetch('http://another-calendar.herokuapp.com/api/v1/user/calendars', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',

@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, Image, Text, KeyboardAvoidingView, TouchableOpacity, ScrollView } from 'react-native';
-import CalendarForm from './CalendarForm';
+import GroupForm from './GroupForm';
 
 
 const styles = StyleSheet.create({
@@ -48,7 +48,7 @@ export default class EditCalendar extends React.Component {
         <Text style={styles.title}> Ajouter un calendrier </Text>
         </View>
         <View style={styles.formContainer}>
-          <CalendarForm navigate={this.props.navigation}/>
+          <GroupForm navigate={this.props.navigation}/>
         </View>
         <TouchableOpacity style={styles.buttonContainer}
           onPress={() => navigate("Home")}>

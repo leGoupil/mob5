@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
 })
 
 
-export default class CalendarList extends React.Component {
+export default class GroupList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -137,9 +137,12 @@ export default class CalendarList extends React.Component {
       onClose: (event, gestureState, swipeable) => {
         this.setState({currentlyOpenSwipeable: null})
       },
-      deleteFriend: (calendar) => {
-        navigate('EditFriend');
-      }
+      deleteGroup: (calendar) => {
+        navigate('EditGroup');
+      },
+      editGroup: (calendar) => {
+        navigate('EditGroup');
+      },
     };
 
     return (
