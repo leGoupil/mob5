@@ -51,15 +51,15 @@ export default class CalendarList extends React.Component {
     if(data.length > 0) {
       for (let sectionId = 0; sectionId < alphabet.length; sectionId++) {
         const currentChar = alphabet[sectionId];
-        const calendars = data.filter((calendar) => calendar.title.toUpperCase().indexOf(currentChar) === 0);
-        if (calendars.length > 0) {
+        const users = data.filter((user) => user.user.email.toUpperCase().indexOf(currentChar) === 0);
+        if (users.length > 0) {
           sectionIds.push(sectionId);
           dataBlob[sectionId] = { character: currentChar };
           rowIds.push([]);
-          for (let i = 0; i < calendars.length; i++) {
+          for (let i = 0; i < users.length; i++) {
             const rowId = `${sectionId}:${i}`;
             rowIds[rowIds.length - 1].push(rowId);
-            dataBlob[rowId] = calendars[i];
+            dataBlob[rowId] = users[i];
           }
         }
       }
@@ -84,7 +84,6 @@ export default class CalendarList extends React.Component {
       })
     })
     .then((response) => {
-      console.log('response', response);
       const responseHeaders = response.headers.map;
       const responseBody = JSON.parse(response._bodyText);
       if(responseBody.error){
@@ -96,7 +95,7 @@ export default class CalendarList extends React.Component {
       }
       return this.setState({
         isLoading: false,
-        dataList: responseBody.data
+        dataList: responseBody || []
       });
     })
     .catch((error) => {

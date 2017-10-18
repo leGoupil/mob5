@@ -11,7 +11,6 @@ const styles = StyleSheet.create({
 
 export default class ContactScreen extends React.Component {
   render() {
-    console.log('FDP');
     return (
       <View style={styles.container}>
         <ContactList navigate={this.props.navigation}/>

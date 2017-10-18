@@ -26,7 +26,7 @@ export default class Header extends Component {
     return (
       <View style={styles.container}>
         <TouchableOpacity style={styles.button} onPress={() => navigate("EditGroup")}>
-          <Text style={styles.text}>Ajouter un groupe</Text>
+          <Text style={styles.text}>Creer un groupe</Text>
         </TouchableOpacity>
       </View>
     )

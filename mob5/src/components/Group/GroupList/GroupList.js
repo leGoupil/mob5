@@ -38,7 +38,8 @@ export default class GroupList extends React.Component {
     super(props);
     this.state = {
       currentlyOpenSwipeable: null,
-      dataList: []
+      dataList: [],
+      needRefresh: false
     }
   }
   formatData() {
@@ -48,18 +49,45 @@ export default class GroupList extends React.Component {
     , sectionIds = []
     , rowIds = [];
 
-    if(data.length > 0) {
-      for (let sectionId = 0; sectionId < alphabet.length; sectionId++) {
-        const currentChar = alphabet[sectionId];
-        const calendars = data.filter((calendar) => calendar.title.toUpperCase().indexOf(currentChar) === 0);
-        if (calendars.length > 0) {
+    if(data.length > 0 && this.state.objAccess) {
+      // for (let sectionId = 0; sectionId < alphabet.length; sectionId++) {
+      //   const currentChar = alphabet[sectionId];
+      //   const calendars = data.filter((calendar) => calendar.title.toUpperCase().indexOf(currentChar) === 0);
+      //   if (calendars.length > 0) {
+      //     sectionIds.push(sectionId);
+      //     dataBlob[sectionId] = { character: currentChar };
+      //     rowIds.push([]);
+      //     for (let i = 0; i < calendars.length; i++) {
+      //       const rowId = `${sectionId}:${i}`;
+      //       rowIds[rowIds.length - 1].push(rowId);
+      //       dataBlob[rowId] = calendars[i];
+      //     }
+      //   }
+      // }
+      for (let sectionId = 0; sectionId < 1; sectionId++) {
+        const ownerOrNot = sectionId ? `Groupes auxquels j'appartient` : 'Mes groupes' ;
+        // console.log('test : ', this.state.objAccess.id);
+        // console.log('test 2 : ', sectionId);
+        // const groups = data.filter((calendar) => calendar.title.toUpperCase().indexOf(currentChar) === 0);
+        const groups = data.filter((group) => {
+          // console.log('group', group);
+          if(!sectionId){
+            // console.log('sectionId 0', group.owner.id === this.state.objAccess.id)
+             return group.owner.id === this.state.objAccess.id
+          }
+          // console.log('sectionId 1', group.owner.id !== this.state.objAccess.id)
+          return  group.owner.id !== this.state.objAccess.id
+        });
+        // console.log('groups by sectionId', sectionId, ownerOrNot, groups);
+        if (groups.length > 0) {
           sectionIds.push(sectionId);
-          dataBlob[sectionId] = { character: currentChar };
+          dataBlob[sectionId] = { text: ownerOrNot };
+          // console.log('dataBlob', dataBlob);
           rowIds.push([]);
-          for (let i = 0; i < calendars.length; i++) {
+          for (let i = 0; i < groups.length; i++) {
             const rowId = `${sectionId}:${i}`;
             rowIds[rowIds.length - 1].push(rowId);
-            dataBlob[rowId] = calendars[i];
+            dataBlob[rowId] = groups[i];
           }
         }
       }
@@ -67,11 +95,13 @@ export default class GroupList extends React.Component {
     return { dataBlob, sectionIds, rowIds };
   }
 
-  componentDidMount() {
+  getGroups() {
+    let tmp = null;
     return getToken()
     .then((bulkAccess) => {
       const objAccess = JSON.parse(bulkAccess);
-      return fetch('http://another-calendar.herokuapp.com/api/v1/user/contacts', {
+      tmp = objAccess;
+      return fetch('http://another-calendar.herokuapp.com/api/v1/user/groups', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -84,24 +114,72 @@ export default class GroupList extends React.Component {
       })
     })
     .then((response) => {
+      // console.log('response from group list', response)
       const responseHeaders = response.headers.map;
       const responseBody = JSON.parse(response._bodyText);
       if(responseBody.error){
         return this.setState({
-          isLoading: false
+          isLoading: false,
+          objAccess: tmp
         }, function () {
           alert(JSON.stringify(responseBody.error));
         });
       }
+      // console.log('DATALIST', responseBody);
       return this.setState({
         isLoading: false,
-        dataList: responseBody.data
+        dataList: responseBody,
+        objAccess: tmp
       });
     })
     .catch((error) => {
       console.error(error);
     });
   }
+
+  componentDidMount() {
+    this.getGroups();
+    // let tmp = null;
+    // return getToken()
+    // .then((bulkAccess) => {
+    //   const objAccess = JSON.parse(bulkAccess);
+    //   tmp = objAccess;
+    //   return fetch('http://another-calendar.herokuapp.com/api/v1/user/groups', {
+    //     method: 'GET',
+    //     headers: {
+    //       'Accept': 'application/json',
+    //       'Content-Type': 'application/json',
+    //       uid: objAccess.uid,
+    //       client: objAccess.client,
+    //       expiry: objAccess.expiry,
+    //       access_token: objAccess.access_token
+    //     }
+    //   })
+    // })
+    // .then((response) => {
+    //   // console.log('response from group list', response)
+    //   const responseHeaders = response.headers.map;
+    //   const responseBody = JSON.parse(response._bodyText);
+    //   if(responseBody.error){
+    //     return this.setState({
+    //       isLoading: false,
+    //       objAccess: tmp
+    //     }, function () {
+    //       alert(JSON.stringify(responseBody.error));
+    //     });
+    //   }
+    //   // console.log('DATALIST', responseBody);
+    //   return this.setState({
+    //     isLoading: false,
+    //     dataList: responseBody,
+    //     objAccess: tmp
+    //   });
+    // })
+    // .catch((error) => {
+    //   console.error(error);
+    // });
+  }
+  // componentWillUpdate(this.state. nextProps, object nextState);
 
   handleScroll = () => {
     const {currentlyOpenSwipeable} = this.state;
@@ -137,8 +215,8 @@ export default class GroupList extends React.Component {
       onClose: (event, gestureState, swipeable) => {
         this.setState({currentlyOpenSwipeable: null})
       },
-      deleteGroup: (calendar) => {
-        navigate('EditGroup');
+      deleteGroup: (id) => {
+        this.getGroups();
       },
       editGroup: (calendar) => {
         navigate('EditGroup');
@@ -152,6 +230,7 @@ export default class GroupList extends React.Component {
         dataSource={this.state.dataSource}
         renderRow={(data) => <Row
           navigate={this.props.navigate}
+          needRefresh={this.state.needRefresh}
           data={data}
           itemProps={itemProps}/>}
         renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}

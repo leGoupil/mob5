@@ -50,7 +50,11 @@ export default class Row extends Component {
     const {currentlyOpenSwipeable} = this.state;
     const { navigate } = this.props.navigate;
     const { data } = this.props;
+    let displayName = data.user.email;
     const { onOpen, onClose } = this.props.itemProps;
+    if(data.user.name && data.user.nickname){
+      displayName = `${data.user.name} ${data.user.nickname}`
+    }
     const deleteFriend = () => {
       //refresh ?
       this.removeCalendar();
@@ -67,9 +71,9 @@ export default class Row extends Component {
         ]}
       >
         <View style={styles.container}>
-          <Image source={{ uri: data.picture || 'https://www.broomfield.org/images/pages/N1446/blue%20heading%20icons_calendar.png'}} style={styles.photo} />
+          <Image source={{ uri: data.picture || 'https://d30y9cdsu7xlg0.cloudfront.net/png/55168-200.png'}} style={styles.photo} />
           <Text style={styles.text}>
-            {`${data.title}`}
+            {displayName}
           </Text>
         </View>
       </Swipeable>

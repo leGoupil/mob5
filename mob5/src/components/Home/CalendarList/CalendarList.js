@@ -69,7 +69,7 @@ export default class CalendarList extends React.Component {
       }
       return this.setState({
         isLoading: false,
-        dataList: responseBody.data
+        dataList: responseBody.data || []
       });
     })
     .catch((error) => {
@@ -110,14 +110,12 @@ export default class CalendarList extends React.Component {
         this.setState({currentlyOpenSwipeable: swipeable});
       },
       onClose: (event, gestureState, swipeable) => {
-        console.log('plop?');
         this.setState({currentlyOpenSwipeable: null})
       },
       editCalendar: (calendar) => {
         navigate('EditCalendar');
       },
       deleteCalendar: (calendar) => {
-        console.log('alnfizhn', calendar);
         navigate('EditCalendar');
       }
     };

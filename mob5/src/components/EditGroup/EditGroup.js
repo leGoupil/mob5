@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default class EditCalendar extends React.Component {
+export default class EditGroup extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
     return (
@@ -45,7 +45,7 @@ export default class EditCalendar extends React.Component {
             style={styles.logo}
             source={require('../../images/logo.png')}
           />
-        <Text style={styles.title}> Ajouter un calendrier </Text>
+        <Text style={styles.title}> Créer un groupe </Text>
         </View>
         <View style={styles.formContainer}>
           <GroupForm navigate={this.props.navigation}/>

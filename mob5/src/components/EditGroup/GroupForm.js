@@ -9,50 +9,117 @@ export default class GroupForm extends Component {
     this.state = {
       isLoading: false,
       title: null,
-      description: null,
-      private: null,
+      id: null,
       userList: [],
-      pictureUrl: null,
+      selectedUserList: [],
+      dataList: {},
       putOrPost: 'POST'
     }
   }
+
   componentDidMount() {
-    let editCalendar = null;
+    let editGroup = null;
+    const ids = [];
     if(this.props.navigate){
       const nav = this.props.navigate;
       if(nav.state){
         if(nav.state.params){
           if(nav.state.params.data){
-            editCalendar = nav.state.params.data;
+            editGroup = nav.state.params.data;
           }
         }
       }
     }
-    if(editCalendar){
-      return this.setState({
-        id: editCalendar.id,
-        title: editCalendar.title,
-        description: editCalendar.description || null,
-        userList: editCalendar.userList || [],
-        pictureUrl: editCalendar.pictureUrl || null,
-        private: editCalendar.private,
+    if(editGroup){
+      if(editGroup.contacts){
+        editGroup.contacts.forEach((obj) => {
+          // uglyArray[obj.user.id] = obj.user.email;
+          ids.push(obj.id.toString())
+        })
+      }
+      // console.log('idfisqjdiq', ids);
+      this.setState({
+        id: editGroup.id,
+        title: editGroup.title,
         putOrPost: 'PUT',
+        selectedUserList: ids
       });
     }
+    return getToken()
+    .then((bulkAccess) => {
+      const objAccess = JSON.parse(bulkAccess);
+      return fetch('http://another-calendar.herokuapp.com/api/v1/user/contacts', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          uid: objAccess.uid,
+          client: objAccess.client,
+          expiry: objAccess.expiry,
+          access_token: objAccess.access_token
+        }
+      })
+    })
+    .then((response) => {
+      const responseHeaders = response.headers.map;
+      const responseBody = JSON.parse(response._bodyText);
+      if(responseBody.error){
+        return this.setState({
+          isLoading: false
+        }, function () {
+          alert(JSON.stringify(responseBody.error));
+        });
+      }
+
+      const uglyObject = {}
+      selectedUser = [];
+      if (responseBody){
+        responseBody.forEach((obj) => {
+          uglyObject[obj.user.id] = obj.user.email;
+        })
+      }
+      if (ids.length > 0){
+        responseBody.forEach((obj) => {
+          ids.forEach((id) => {
+            if(id === obj.user.id){
+              selectedUser.push(obj.user.id.toString())
+            }
+          })
+        })
+      }
+      // console.log('kikoo', ids);
+      // console.log('kikoo', uglyObject);
+      // console.log('selectedUser', selectedUser);
+      return this.setState({
+        isLoading: false,
+        dataList: uglyObject,
+        // userList: selectedUser
+        // selectedUser: ids,
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
   }
 
   _onPressButton = () => {
-  if(!this.state.title || !this.state.description){
-    alert('Merci de préciser un titre et une description');
+  if(!this.state.title){
+    alert('Merci de préciser un titre');
     return null;
   }
   this.setState({
     isLoading: true,
   });
+  let dirtyCheck = '';
+  if(this.state.putOrPost === 'PUT'){
+    dirtyCheck = `/${this.state.id}`;
+  }
+  let uglyyyGlobal = null;
   return getToken()
   .then((bulkAccess) => {
     const objAccess = JSON.parse(bulkAccess);
-    return fetch('http://another-calendar.herokuapp.com/api/v1/user/calendars/3', {
+    uglyyyGlobal = objAccess;
+    return fetch(`http://another-calendar.herokuapp.com/api/v1/user/groups${dirtyCheck}`, {
       method: this.state.putOrPost,
         headers: {
           'Accept': 'application/json',
@@ -65,14 +132,14 @@ export default class GroupForm extends Component {
         body: JSON.stringify({
           title: this.state.title,
           // description: this.state.description,
-          private: true,
-          id: 4
         })
       })
   })
   .then((response) => {
+    console.log('response after submitting group', response);
     const responseHeaders = response.headers.map;
     const responseBody = JSON.parse(response._bodyText);
+    // console.log('responsresponseHeaderskdkqidjiqeBody', responseHeaders);
     if(responseBody.error){
       return this.setState({
         isLoading: false,
@@ -87,6 +154,42 @@ export default class GroupForm extends Component {
         alert(JSON.stringify(responseBody.errors));
       });
     }
+    const userIds = this.state.userList;
+    console.log('userIds', userIds);
+    // userIds.shift();
+    const promises = [];
+    if(userIds.length > 0){
+      userIds.forEach((id) => {
+        console.log('COUCOU FDP');
+        // let userId =
+        let func = new Promise((resolve, reject) => {
+          return fetch(`http://another-calendar.herokuapp.com/api/v1/user/groups/${responseBody.id}/contact`, {
+            method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                uid: uglyyyGlobal.uid,
+                client: uglyyyGlobal.client,
+                expiry: uglyyyGlobal.expiry,
+                access_token: uglyyyGlobal.access_token
+              },
+              body: JSON.stringify({
+                contact_id: parseInt(id,10)
+              })
+            })
+            .then((addMember)=>{
+              console.log('addMember reuslt', addMember);
+              resolve(addMember);
+            })
+          });
+        promises.push(func)
+      });
+      return Promise.all(promises);
+    }
+  })
+  .then((truc) => {
+    // alert(JSON.stringify(error));
+    console.log('response from add/edit group', truc);
   })
   .catch((error) => {
     alert(JSON.stringify(error));
@@ -94,16 +197,8 @@ export default class GroupForm extends Component {
   });
 };
 
-  userList = {
-    "123":"Tom",
-    "124":"Michael",
-    "125":"Christin"
-  }
-
   render() {
     const { navigate } = this.props.navigate;
-    // const { calendar } = this.props.calendar || this.state.calendar;
-    // this.setState({calendar})
     return (
       <View style={styles.container}>
         <StatusBar
@@ -113,7 +208,6 @@ export default class GroupForm extends Component {
         placeholder="titre"
         placeholderTextColor="rgba(255,255,255,0.7)"
         returnKeyType="next"
-        onSubmitEditing={() => this.passwordInput.focus()}
         value={this.state.title}
         onChangeText={(title) => this.setState({title})}
         keyboardType="email-address"
@@ -122,30 +216,16 @@ export default class GroupForm extends Component {
         autoCorrect={false}
         style={styles.input}
         />
-        <TextInput
-        placeholder="Description"
-        placeholderTextColor="rgba(255,255,255,0.7)"
-        returnKeyType="go"
-        disabled={this.state.isLoading}
-        value={this.state.description}
-        onChangeText={(description) => this.setState({description})}
-        secureTextEntry
-        autoCapitalize="none"
-        autoCorrect={false}
-        style={styles.input}
-        ref={(input) => this.passwordInput = input}
-        />
         <CustomMultiPicker
-          options={this.userList}
+          options={this.state.dataList}
           search={true}
           multiple={true}
           placeholder={"Ajouter des amis a ce calendrier"}
           placeholderTextColor={'rgba(255,255,255,0.7)'}
-          returnValue={"label"} // label or value
-          callback={(res)=>{ console.log(res) }} // callback, array of selected items
+          returnValue={"value"} // label or value
           rowBackgroundColor={"#eee"}
           rowHeight={40}
-          value={this.state.userList}
+          selected={this.state.selectedUserList}
           callback={(userList) => this.setState({userList})}
           rowRadius={5}
           iconColor={"#00a2dd"}
@@ -153,7 +233,6 @@ export default class GroupForm extends Component {
           selectedIconName={"ios-checkmark-circle-outline"}
           unselectedIconName={"ios-radio-button-off-outline"}
           scrollViewHeight={130}
-          selected={[1,2]} // list of options which are selected by default
         />
 
         <TouchableOpacity style={styles.buttonContainer}
@@ -165,7 +244,10 @@ export default class GroupForm extends Component {
     )
   }
 }
-
+// value={this.state.userList}
+// callback={(userList)=>{ console.log(userList) }}
+// callback={(userList) => this.setState({userList})}
+//selected={[1,2]} // list of options which are selected by default
 const styles = StyleSheet.create({
   container: {
     padding: 20

@@ -51,6 +51,7 @@ export default class LoginForm extends Component {
       client = responseHeaders.client[0];
       expiry = responseHeaders.expiry[0];
       uid = responseBody.data.uid;
+      id = responseBody.data.id;
       access_token = responseHeaders['access-token'][0];
       return fetch('http://another-calendar.herokuapp.com/api/v1/auth/validate_token', {
         method: 'GET',
@@ -84,7 +85,7 @@ export default class LoginForm extends Component {
         isLoading: false,
       }, function () {
         const { navigate } = this.props.navigate;
-        onSignIn({uid, client, access_token, expiry}).then(() => navigate("SignedIn"));
+        onSignIn({id, uid, client, access_token, expiry}).then(() => navigate("SignedIn"));
       });
     })
     .catch((error) => {

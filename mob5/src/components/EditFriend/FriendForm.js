@@ -39,8 +39,6 @@ export default class CalendarForm extends Component {
       })
   })
   .then((response) => {
-    console.log('add friend ?', response);
-    console.log('add friend ?', response.ok);
     if(response){
       if(!response.ok){
         return this.setState({

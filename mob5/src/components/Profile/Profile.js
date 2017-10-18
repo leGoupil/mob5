@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, Image, Text, KeyboardAvoidingView, TouchableOpacity } from 'react-native';
 import { onSignOut } from '../../auth';
+import ProfileForm from './ProfileForm';
 
 const styles = StyleSheet.create({
   container: {
@@ -51,15 +52,18 @@ export default class ProfileScreen extends React.Component {
             style={styles.logo}
             source={require('../../images/logo.png')}
           />
-        <Text style={styles.title}> blablabla profile page </Text>
+        <Text style={styles.title}> Votre profil </Text>
         </View>
         <View style={styles.formContainer}>
+        </View>
+        <View style={styles.formContainer}>
+          <ProfileForm navigate={this.props.navigation}/>
         </View>
         <TouchableOpacity style={styles.buttonContainer}
           onPress={() => {
             onSignOut().then(() => navigate("SignedOut"));
           }}>
-          <Text style={styles.buttonText}> Log Out ! </Text>
+          <Text style={styles.buttonText}> Déconnexion ! </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     )
