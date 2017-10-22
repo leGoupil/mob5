@@ -34,7 +34,8 @@ export default class CalendarForm extends Component {
           access_token: objAccess.access_token
         },
         body: JSON.stringify({
-          email: this.state.emailField
+          // email: this.state.emailField
+          contact: { 'email': this.state.emailField }
         })
       })
   })
@@ -64,10 +65,14 @@ export default class CalendarForm extends Component {
         alert(JSON.stringify(responseBody.errors));
       });
     }
+    return this.setState({
+      isLoading: false,
+    }, function () {
+      alert('votre ami a bien été ajouté');
+    });
   })
   .catch((error) => {
-    alert(JSON.stringify(error));
-    console.error(error);
+    console.log(error);
   });
 };
 

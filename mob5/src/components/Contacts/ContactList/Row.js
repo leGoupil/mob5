@@ -43,7 +43,6 @@ export default class Row extends Component {
   }
 
   removeCalendar = () => {
-    console.log('muhahaha');
   };
 
   render(){

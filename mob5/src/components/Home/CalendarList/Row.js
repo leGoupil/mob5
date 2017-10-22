@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Swipeable from 'react-native-swipeable';
 import { FontAwesome } from "react-native-vector-icons";
+import { getToken } from '../../../auth';
 
 const styles = StyleSheet.create({
   container: {
@@ -27,7 +28,6 @@ const styles = StyleSheet.create({
   },
   rightSwipeItem: {
     flex: 1,
-    // alignItems: 'center',
     justifyContent: 'center',
     paddingLeft: 25
   }
@@ -37,44 +37,157 @@ export default class Row extends Component {
   constructor() {
     super();
     this.state = {
-      isOpen: null
+      isOpen: null,
+      leftIcon: 'trash-o',
+      leftBackgroundColor: 'red',
+      rightIcon: 'edit',
+      rightBackgroundColor: 'orange',
     };
   }
 
-  removeCalendar = () => {
-    console.log('muhahaha');
-  };
+  componentDidMount() {
+    const { data } = this.props;
+    let isOwner = false
+    return getToken()
+    .then((bulkAccess) => {
+      const objAccess = JSON.parse(bulkAccess);
+      if(data.owner.id === objAccess.id){
+        isOwner = true;
+        this.setState({
+          isLoading: false,
+          leftIcon: 'trash-o',
+          leftBackgroundColor: data.primary ? 'grey' : 'red',
+          rightIcon: 'edit',
+          rightBackgroundColor: 'orange',
+          objAccess: objAccess,
+          isOwner,
+          isPrimary: data.primary,
+          data
+        });
+      } else {
+        this.setState({
+          isLoading: false,
+          leftIcon: 'trash-o',
+          leftBackgroundColor: 'orange',
+          rightIcon: 'info',
+          rightBackgroundColor: 'green',
+          objAccess: objAccess,
+          isOwner,
+          isPrimary: data.primary,
+          data
+        });
+      }
+    })
+  }
 
   render(){
     const {currentlyOpenSwipeable} = this.state;
     const { navigate } = this.props.navigate;
     const { data } = this.props;
-    // const { onOpen, onClose, editCalendar, deleteCalendar } = this.props.itemProps;
-    const { onOpen, onClose } = this.props.itemProps;
-    const editCalendar = () => {
-      // currentlyOpenSwipeable.recenter();
-      navigate('EditCalendar', {data});
+    const { onOpen, onClose, deleteCalendar } = this.props.itemProps;
+    const infosOrEdit = () => {
+      if(this.state.isOwner){
+          return navigate('EditCalendar', {data});
+      }
+      return navigate('InfoCalendar', {data: this.state.data});
     };
-    const deleteCalendar = () => {
-      // currentlyOpenSwipeable.recenter();
-      this.removeCalendar();
+    const openCalendar = () => {
+      navigate('Calendar', {data: this.props.data});
+    };
+    const destroyOrLeave = () => {
+      if(this.state.isOwner) {
+        return fetch(`http://another-calendar.herokuapp.com/api/v1/user/calendars/${this.props.data.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            uid: this.state.objAccess.uid,
+            client: this.state.objAccess.client,
+            expiry: this.state.objAccess.expiry,
+            access_token: this.state.objAccess.access_token
+          }
+        })
+        .then((response) => {
+          const responseHeaders = response.headers.map;
+          const responseBody = JSON.parse(response._bodyText);
+          if(responseBody.error){
+            return this.setState({
+              isLoading: false
+            }, function () {
+              alert(JSON.stringify(responseBody.error));
+            });
+          }
+          return this.setState({
+            isLoading: false
+          }, function(){
+            deleteCalendar(this.props.data.id);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      }else{
+        const calendar = this.state.data;
+        return fetch(`http://another-calendar.herokuapp.com/api/v1/user/calendars/${this.props.data.id}/leave`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            uid: this.state.objAccess.uid,
+            client: this.state.objAccess.client,
+            expiry: this.state.objAccess.expiry,
+            access_token: this.state.objAccess.access_token
+          }
+        })
+        .then((response) => {
+          const responseHeaders = response.headers.map;
+          const responseBody = JSON.parse(response._bodyText);
+          if(responseBody.error){
+            return this.setState({
+              isLoading: false
+            }, function () {
+              alert(JSON.stringify(responseBody.error));
+            });
+          }
+          return this.setState({
+            isLoading: false
+          }, function(){
+            deleteCalendar(this.props.data.id);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      }
+    };
+    const leftContent =
+    <TouchableOpacity style={[styles.leftSwipeItem, {backgroundColor: 'green'}]}
+      onPress={openCalendar}>
+      <Text> Ouvrir le calendrier </Text>
+    </TouchableOpacity>;
+    const rightButtons = [
+      <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: this.state.leftBackgroundColor}]}
+        onPress={destroyOrLeave}
+        disabled={this.state.isPrimary}
+        >
+        <FontAwesome name={this.state.leftIcon} size={30} color={'white'} />
+      </TouchableOpacity>,
+      <TouchableOpacity
+        onPress={infosOrEdit}
+        style={[styles.rightSwipeItem, {backgroundColor: this.state.rightBackgroundColor}]}>
+        <FontAwesome name={this.state.rightIcon} size={30} color={'white'} />
+      </TouchableOpacity>
+    ];
+    const rightContent = () => {
+      return (rightButtons);
     }
     return(
       <Swipeable
-        rightButtons={[
-          <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: 'red'}]}
-            onPress={deleteCalendar}
-          >
-            <FontAwesome name="trash-o" size={30} color={'white'} />
-          </TouchableOpacity>,
-          <TouchableOpacity
-            onPress={editCalendar}
-            style={[styles.rightSwipeItem, {backgroundColor: 'orange'}]}>
-            <FontAwesome name="edit" size={30} color={'white'} />
-          </TouchableOpacity>
-        ]}
-      >
-
+        leftActionActivationDistance={125}
+        leftContent={leftContent}
+        onLeftActionComplete={openCalendar}
+        rightButtons={rightButtons}
+        >
         <View style={styles.container}>
           <Image source={{ uri: data.picture || 'https://www.broomfield.org/images/pages/N1446/blue%20heading%20icons_calendar.png'}} style={styles.photo} />
           <Text style={styles.text}>
@@ -85,5 +198,3 @@ export default class Row extends Component {
     )
   }
 }
-
-// {`${data.title} ${data.name.last}`}

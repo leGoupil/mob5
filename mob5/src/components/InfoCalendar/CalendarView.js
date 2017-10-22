@@ -42,6 +42,9 @@ export default class CalendarForm extends Component {
         putOrPost: 'PUT',
         isPrimary: check
       });
+      if(editCalendar.infoMode){
+        this.setState({ infoMode: true });
+      }
     }
 
     return getToken()

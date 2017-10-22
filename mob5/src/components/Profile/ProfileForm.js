@@ -32,7 +32,7 @@ export default class GroupForm extends Component {
     })
     .then((response) => {
       const responseHeaders = response.headers.map;
-      const responseBody = JSON.parse(response._bodyText);
+      const responseBody = JSON.parse(response._bodyInit);
       if(responseBody.error){
         return this.setState({
           isLoading: false
@@ -48,7 +48,7 @@ export default class GroupForm extends Component {
       });
     })
     .catch((error) => {
-      console.error(error);
+      console.log(error);
     });
   }
 
@@ -78,22 +78,30 @@ export default class GroupForm extends Component {
           nickname: this.state.lastname
         })
       })
-  })
-  .then((response) => {
-    console.log('response', response);
-    const responseHeaders = response.headers.map;
-    const responseBody = JSON.parse(response._bodyText);
-    if(responseBody.error){
-      return this.setState({
-        isLoading: false
-      }, function () {
-        alert(JSON.stringify(responseBody.error));
-      });
-    }
-    alert('Votre profil a été modifié')
+      .then((response) => {
+        console.log('RESPONSE', response);
+        // const responseHeaders = response.headers.map;
+        // const responseBody = JSON.parse(response._bodyText);
+        if(response.ok){
+          // return this.setState({
+          //   isLoading: false
+          // }, function () {
+          //   navigate('Profile');
+          // });
+          alert('Les modifications ont été prises en compte');
+          return
+          // return this.props.navigate.navigate('Profile');
+        }
+        // return this.setState({
+        //   isLoading: false
+        // }, function () {
+        //   alert('Une erreur est survenue');
+        // });
+        alert('Une erreur est survenue');
+      })
   })
   .catch((error) => {
-    alert(JSON.stringify(error));
+    console.log(error);
   });
 };
 

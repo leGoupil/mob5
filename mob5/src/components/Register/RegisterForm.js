@@ -94,6 +94,7 @@ export default class RegisterForm extends Component {
       });
     })
     .catch((error) => {
+      console.log('error', error);
       alert(JSON.stringify(error));
     });
 };

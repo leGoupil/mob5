@@ -2,8 +2,7 @@ import React, {Component} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Swipeable from 'react-native-swipeable';
 import { FontAwesome } from "react-native-vector-icons";
-import { getToken } from '../../../auth';
-
+import { getToken } from '../../auth';
 
 const styles = StyleSheet.create({
   container: {
@@ -44,7 +43,6 @@ export default class Row extends Component {
       leftBackgroundColor: 'red',
       rightIcon: 'edit',
       rightBackgroundColor: 'orange',
-      crownIcon: ''
     };
   }
 
@@ -60,7 +58,8 @@ export default class Row extends Component {
           leftBackgroundColor: 'red',
           rightIcon: 'edit',
           rightBackgroundColor: 'orange',
-          objAccess: objAccess
+          objAccess: objAccess,
+          isOwner: true
         });
       }
       return this.setState({
@@ -69,84 +68,84 @@ export default class Row extends Component {
         leftBackgroundColor: 'red',
         rightIcon: 'info',
         rightBackgroundColor: 'green',
-        objAccess: objAccess
+        objAccess: objAccess,
+        isOwner: false
       });
     })
   }
-
-  removeGroup = () => {
-    console.log('muhahaha');
-  };
 
   render(){
     const {currentlyOpenSwipeable} = this.state;
     const { navigate } = this.props.navigate;
     const { data } = this.props;
-    const { onOpen, onClose, deleteGroup } = this.props.itemProps;
-
+    const { onOpen, onClose, deleteCalendar } = this.props.itemProps;
+    if(data.user.name && data.user.nickname){
+      displayName = `${data.user.name} ${data.user.nickname}`
+    }
     const infosOrEditGroup = () => {
-      // currentlyOpenSwipeable.recenter();
-      navigate('EditGroup', {data});
+      if(this.state.isOwner) { return navigate('EditCalendar', {data}); }
+      // navigate('calendarInfos', {data});
     };
     const destroyOrLeaveGroup = () => {
-      // console.log('this;jaoiefji', this.props.data);
-      // console.log('this;jaoiefji', this.state.objAccess);
-      return fetch(`http://another-calendar.herokuapp.com/api/v1/user/groups/${this.props.data.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          uid: this.state.objAccess.uid,
-          client: this.state.objAccess.client,
-          expiry: this.state.objAccess.expiry,
-          access_token: this.state.objAccess.access_token
-        }
-      })
-      .then((response) => {
-        const responseHeaders = response.headers.map;
-        const responseBody = JSON.parse(response._bodyText);
-        if(responseBody.error){
+      if(this.state.isOwner) {
+        return fetch(`http://another-calendar.herokuapp.com/api/v1/user/calendars/${this.props.data.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            uid: this.state.objAccess.uid,
+            client: this.state.objAccess.client,
+            expiry: this.state.objAccess.expiry,
+            access_token: this.state.objAccess.access_token
+          }
+        })
+        .then((response) => {
+          const responseHeaders = response.headers.map;
+          const responseBody = JSON.parse(response._bodyText);
+          if(responseBody.error){
+            return this.setState({
+              isLoading: false
+            }, function () {
+              alert(JSON.stringify(responseBody.error));
+            });
+          }
           return this.setState({
             isLoading: false
-          }, function () {
-            alert(JSON.stringify(responseBody.error));
+          }, function(){
+            console.log('this.props.data.id', this.props.data.id);
+            deleteCalendar(this.props.data.id);
           });
-        }
-        return this.setState({
-          isLoading: false
-        }, function(){
-          deleteGroup(this.props.data.id);
-          // navigate('Group');
+        })
+        .catch((error) => {
+          console.error(error);
         });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      }
     };
-
-
     return(
       <Swipeable
         rightButtons={[
           <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: this.state.leftBackgroundColor}]}
             onPress={destroyOrLeaveGroup}
           >
-            <FontAwesome name={this.state.leftIcon} size={30} color={'white'} />
+            <FontAwesome name="trash-o" size={30} color={'white'} />
           </TouchableOpacity>,
           <TouchableOpacity
             onPress={infosOrEditGroup}
             style={[styles.rightSwipeItem, {backgroundColor: this.state.rightBackgroundColor}]}>
-            <FontAwesome name={this.state.rightIcon} size={30} color={'white'} />
+            <FontAwesome name="edit" size={30} color={'white'} />
           </TouchableOpacity>
         ]}
       >
+
         <View style={styles.container}>
-          <Image source={{ uri: data.picture || 'https://image.freepik.com/free-icon/multiple-users-silhouette_318-49546.jpg'}} style={styles.photo} />
+          <Image source={{ uri: data.picture || 'https://www.broomfield.org/images/pages/N1446/blue%20heading%20icons_calendar.png'}} style={styles.photo} />
           <Text style={styles.text}>
-            {`${data.title}`}
+            {displayName}
           </Text>
         </View>
       </Swipeable>
     )
   }
 }
+
+// {`${data.title} ${data.name.last}`}

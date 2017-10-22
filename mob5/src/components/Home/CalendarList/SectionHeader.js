@@ -15,6 +15,6 @@ const styles = StyleSheet.create({
 
 export default SectionHeader = (props) => (
   <View style={styles.container}>
-    <Text style={styles.text}>{props.character}</Text>
+    <Text style={styles.text}>{props.text}</Text>
   </View>
 );

@@ -8,10 +8,11 @@ import Login from "./components/Login/Login";
 import Home from "./components/Home/Home";
 import Contacts from "./components/Contacts/Contacts";
 import Profile from "./components/Profile/Profile";
-import Group from "./components/Group/Group";
+import Calendar from "./components/Calendar/Calendar";
 import EditCalendar from "./components/EditCalendar/EditCalendar";
+import InfoCalendar from "./components/InfoCalendar/InfoCalendar";
+import EditEvent from "./components/Event/Event";
 import EditFriend from "./components/EditFriend/EditFriend";
-import EditGroup from "./components/EditGroup/EditGroup";
 
 const headerStyle = {
   marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
@@ -52,14 +53,6 @@ export const SignedIn = TabNavigator(
           <FontAwesome name="address-book" size={30} color={tintColor} />
       }
     },
-    Group: {
-      screen: Group,
-      navigationOptions: {
-        tabBarLabel: "Groupes",
-        tabBarIcon: ({ tintColor }) =>
-          <FontAwesome name="group" size={30} color={tintColor} />
-      }
-    },
     Profile: {
       screen: Profile,
       navigationOptions: {
@@ -96,8 +89,10 @@ export const createRootNavigator = (signedIn = false) => {
         }
       },
       EditCalendar: { screen: EditCalendar },
+      InfoCalendar: { screen: InfoCalendar },
       EditFriend: { screen: EditFriend },
-      EditGroup: { screen: EditGroup }
+      Calendar: { screen: Calendar },
+      EditEvent: { screen: EditEvent }
     },
     {
       headerMode: "none",

@@ -15,36 +15,17 @@ export default class CalendarList extends React.Component {
       dataList: []
     }
   }
-  formatData() {
-    const data = this.state.dataList
-    , alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
-    , dataBlob = {}
-    , sectionIds = []
-    , rowIds = [];
 
-    if(data.length > 0) {
-      for (let sectionId = 0; sectionId < alphabet.length; sectionId++) {
-        const currentChar = alphabet[sectionId];
-        const calendars = data.filter((calendar) => calendar.title.toUpperCase().indexOf(currentChar) === 0);
-        if (calendars.length > 0) {
-          sectionIds.push(sectionId);
-          dataBlob[sectionId] = { character: currentChar };
-          rowIds.push([]);
-          for (let i = 0; i < calendars.length; i++) {
-            const rowId = `${sectionId}:${i}`;
-            rowIds[rowIds.length - 1].push(rowId);
-            dataBlob[rowId] = calendars[i];
-          }
-        }
-      }
-    }
-    return { dataBlob, sectionIds, rowIds };
-  }
-
-  componentDidMount() {
+  getCalendars() {
+    this.setState({
+      isLoading: true,
+      dataList: []
+    });
+    let tmp = null;
     return getToken()
     .then((bulkAccess) => {
       const objAccess = JSON.parse(bulkAccess);
+      tmp = objAccess;
       return fetch('http://another-calendar.herokuapp.com/api/v1/user/calendars', {
         method: 'GET',
         headers: {
@@ -62,19 +43,59 @@ export default class CalendarList extends React.Component {
       const responseBody = JSON.parse(response._bodyText);
       if(responseBody.error){
         return this.setState({
-          isLoading: false
+          isLoading: false,
+          objAccess: tmp
         }, function () {
           alert(JSON.stringify(responseBody.error));
         });
       }
       return this.setState({
         isLoading: false,
-        dataList: responseBody.data || []
+        dataList: responseBody,
+        objAccess: tmp
       });
     })
     .catch((error) => {
-      console.error(error);
+      console.log(error);
     });
+  }
+
+  formatData() {
+    const data = this.state.dataList
+    , alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+    , dataBlob = {}
+    , sectionIds = []
+    , rowIds = [];
+
+    if(data.length > 0 && this.state.objAccess) {
+      for (let sectionId = 0; sectionId < 2; sectionId++) {
+        const ownerOrNot = sectionId ? `Calendriers auxquels j'appartient` : 'Mes calendriers' ;
+        const calendars = [];
+        data.forEach((calendar) => {
+          if(sectionId === 0 && calendar.owner.id === this.state.objAccess.id){
+            calendars.push(calendar);
+          }
+          if(sectionId === 1 && calendar.owner.id !== this.state.objAccess.id){
+            calendars.push(calendar);
+          }
+        });
+        if (calendars.length > 0) {
+          sectionIds.push(sectionId);
+          dataBlob[sectionId] = { text: ownerOrNot };
+          rowIds.push([]);
+          for (let i = 0; i < calendars.length; i++) {
+            const rowId = `${sectionId}:${i}`;
+            rowIds[rowIds.length - 1].push(rowId);
+            dataBlob[rowId] = calendars[i];
+          }
+        }
+      }
+    }
+    return { dataBlob, sectionIds, rowIds };
+  }
+
+  componentDidMount() {
+    this.getCalendars();
   }
 
   handleScroll = () => {
@@ -113,10 +134,10 @@ export default class CalendarList extends React.Component {
         this.setState({currentlyOpenSwipeable: null})
       },
       editCalendar: (calendar) => {
-        navigate('EditCalendar');
+        navigate('Home');
       },
       deleteCalendar: (calendar) => {
-        navigate('EditCalendar');
+        this.getCalendars();
       }
     };
 
@@ -136,8 +157,7 @@ export default class CalendarList extends React.Component {
     );
   }
 }
-// itemProps={itemProps}
-// renderFooter={() => <Footer />}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -163,3 +183,5 @@ const styles = StyleSheet.create({
     height: 44,
   },
 })
+
+//         renderFooter={() => <Footer navigate={this.props.navigate}/>}
