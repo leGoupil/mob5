@@ -10,8 +10,9 @@ export default class CalendarForm extends Component {
       isLoading: false,
       title: null,
       userList: [],
+      selectedC: [],
       image: null,
-      dataList: {},
+      contactList: {},
       putOrPost: 'POST',
       isPrimary: false
     }
@@ -25,6 +26,7 @@ export default class CalendarForm extends Component {
         if(nav.state.params){
           if(nav.state.params.data){
             editCalendar = nav.state.params.data;
+            console.log('editCalendar', editCalendar);
           }
         }
       }
@@ -35,6 +37,7 @@ export default class CalendarForm extends Component {
         check = true;
       }
       this.setState({
+        editCalendar,
         id: editCalendar.id,
         title: editCalendar.title,
         userList: editCalendar.participants || [],
@@ -69,16 +72,45 @@ export default class CalendarForm extends Component {
           alert(JSON.stringify(responseBody.error));
         });
       }
-
+      // "calendar_participants": Array [
+      //   Object {
+      //     "calendar_id": 10,
+      //     "id": 7,
+      //     "participant_id": 1,
+      //   },
+      //   Object {
+      //     "calendar_id": 10,
+      //     "id": 8,
+      //     "participant_id": 2,
+      //   },
+      // ],
       const uglyObject = {}
-      if (responseBody){
-        responseBody.forEach((obj) => {
-          uglyObject[obj.id] = obj.user.email;
-        })
+      const editCalendar = this.state.editCalendar;
+      let jpp = [];
+      if(editCalendar){
+        if (responseBody){
+          responseBody.forEach((obj) => {
+            // editCalendar.calendar_participants.forEach((participant) => {
+            //   if(participant.participant_id === obj.id){
+            //     jpp.push(obj.id.toString());
+            //   }
+            // })
+            const toDisplay = obj.user.name ? `${obj.user.name} ${obj.user.nickname}` : obj.user.email;
+            uglyObject[obj.id] = toDisplay;
+          })
+        }
+      } else {
+        if (responseBody){
+          responseBody.forEach((obj) => {
+            const toDisplay = obj.user.name ? `${obj.user.name} ${obj.user.nickname}` : obj.user.email;
+            uglyObject[obj.id] = toDisplay;
+          })
+        }
       }
       return this.setState({
         isLoading: false,
-        dataList: uglyObject,
+        contactList: uglyObject,
+        selectedC :jpp
       });
     })
     .catch((error) => {
@@ -97,13 +129,24 @@ export default class CalendarForm extends Component {
     return getToken()
     .then((bulkAccess) => {
       const objAccess = JSON.parse(bulkAccess);
+      const editCalendar = this.state.editCalendar;
       const userList = this.state.userList;
       const list = [];
       if(userList[0] === undefined) {
         userList.shift();
       }
       userList.forEach((id) => {
-        list.push({ participant_id: id });
+        let check = false;
+        if(editCalendar){
+          editCalendar.calendar_participants.forEach((contact) => {
+            if(parseInt(contact.participant_id, 10) === parseInt(id, 10)){
+                check = true;
+            }
+          });
+        }
+        if(!check){
+          list.push({ participant_id: id });
+        }
       });
       const buildBody = {}
       , check = this.state.isPrimary;
@@ -113,7 +156,7 @@ export default class CalendarForm extends Component {
         buildBody.events_attributes = [];
         buildBody.image = this.state.image || null;
       }
-      const checkPut = this.state.id ? `/${this.state.id}` : ''
+      const checkPut = this.state.id ? `/${this.state.id}` : '';
       return fetch(`http://another-calendar.herokuapp.com/api/v1/user/calendars${checkPut}`, {
         method: this.state.putOrPost,
         headers: {
@@ -147,7 +190,8 @@ export default class CalendarForm extends Component {
       return this.setState({
         isLoading: false,
       }, function () {
-        alert('votre calendrier a bien été crée');
+        const { navigate } = this.props.navigate
+        navigate('Home')
       });
     })
     .catch((error) => {
@@ -156,8 +200,10 @@ export default class CalendarForm extends Component {
     });
   };
 
+
   IsPrimary = (props) => {
     const isPrimary = props.isPrimary;
+    const truc = this.state.selectedC;
     if (isPrimary) {
       return(
         <TextInput
@@ -170,12 +216,12 @@ export default class CalendarForm extends Component {
     }
     return(
       <CustomMultiPicker
-        options={this.state.dataList}
+        options={this.state.contactList}
         search={true}
         multiple={true}
+        selected={truc}
         placeholder={'Ajouter des amis a ce calendrier'}
         placeholderTextColor={'rgba(255,255,255,0.7)'}
-        returnValue={"value"}
         rowBackgroundColor={"#eee"}
         rowHeight={40}
         callback={(userList) => this.setState({userList})}

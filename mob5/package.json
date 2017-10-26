@@ -26,6 +26,7 @@
     "react-native-calendars": "^1.7.1",
     "react-native-datepicker": "^1.6.0",
     "react-native-form-generator": "^0.9.9",
+    "react-native-modal-datetime-picker": "^4.13.0",
     "react-native-modalbox": "^1.4.2",
     "react-native-multiple-select": "^0.2.7",
     "react-native-multiple-select-list": "^1.0.4",

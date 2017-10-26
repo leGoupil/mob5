@@ -68,6 +68,14 @@ export default class CalendarList extends React.Component {
   }
 
   componentDidMount() {
+    this.getFriends();
+  }
+
+  getFriends() {
+    // this.setState({
+    //   isLoading: true,
+    //   dataList: []
+    // });
     return getToken()
     .then((bulkAccess) => {
       const objAccess = JSON.parse(bulkAccess);
@@ -103,7 +111,6 @@ export default class CalendarList extends React.Component {
     });
   }
 
-
   handleScroll = () => {
     const {currentlyOpenSwipeable} = this.state;
     if (currentlyOpenSwipeable) {
@@ -128,6 +135,11 @@ export default class CalendarList extends React.Component {
       currentlyOpenSwipeable: null,
       dataSource: ds.cloneWithRowsAndSections(dataBlob, sectionIds, rowIds),
     };
+    const obj = {
+      refresh: () => {
+        this.getCalendars();
+      }
+    }
     const itemProps = {
       onOpen: (event, gestureState, swipeable) => {
         if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
@@ -139,7 +151,7 @@ export default class CalendarList extends React.Component {
         this.setState({currentlyOpenSwipeable: null})
       },
       deleteFriend: (calendar) => {
-        navigate('EditFriend');
+        this.getFriends();
       }
     };
     return (
@@ -153,6 +165,7 @@ export default class CalendarList extends React.Component {
           itemProps={itemProps}/>}
         renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}
         renderHeader={() => <Header navigate={this.props.navigate}/>}
+        renderFooter={() => <Footer itemProps={obj}/>}
         renderSectionHeader={(sectionData) => <SectionHeader {...sectionData} />}
         />
     );

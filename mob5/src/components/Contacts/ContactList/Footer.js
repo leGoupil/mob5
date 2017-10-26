@@ -20,10 +20,18 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Footer= (props) => (
-  <View style={styles.container}>
-    <TouchableOpacity style={styles.button} onPress={() => console.log('load more')}>
-      <Text style={styles.text}>Load More</Text>
-    </TouchableOpacity>
-  </View>
-);
+export default class Footer extends React.Component {
+  render() {
+    const { refresh } = this.props.itemProps;
+    const action = () => {
+        refresh();
+    };
+    return (
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.button} onPress={action}>
+          <Text style={styles.text}>Raffraichir</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+}

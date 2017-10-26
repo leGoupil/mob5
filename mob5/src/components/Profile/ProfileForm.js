@@ -79,24 +79,10 @@ export default class GroupForm extends Component {
         })
       })
       .then((response) => {
-        console.log('RESPONSE', response);
-        // const responseHeaders = response.headers.map;
-        // const responseBody = JSON.parse(response._bodyText);
         if(response.ok){
-          // return this.setState({
-          //   isLoading: false
-          // }, function () {
-          //   navigate('Profile');
-          // });
           alert('Les modifications ont été prises en compte');
           return
-          // return this.props.navigate.navigate('Profile');
         }
-        // return this.setState({
-        //   isLoading: false
-        // }, function () {
-        //   alert('Une erreur est survenue');
-        // });
         alert('Une erreur est survenue');
       })
   })

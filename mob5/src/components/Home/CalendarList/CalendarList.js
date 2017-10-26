@@ -123,6 +123,11 @@ export default class CalendarList extends React.Component {
       currentlyOpenSwipeable: null,
       dataSource: ds.cloneWithRowsAndSections(dataBlob, sectionIds, rowIds),
     };
+    const obj = {
+      refresh: () => {
+        this.getCalendars();
+      }
+    }
     const itemProps = {
       onOpen: (event, gestureState, swipeable) => {
         if (currentlyOpenSwipeable && currentlyOpenSwipeable !== swipeable) {
@@ -152,6 +157,7 @@ export default class CalendarList extends React.Component {
           itemProps={itemProps}/>}
         renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator} />}
         renderHeader={() => <Header navigate={this.props.navigate}/>}
+        renderFooter={() => <Footer itemProps={obj}/>}
         renderSectionHeader={(sectionData) => <SectionHeader {...sectionData} />}
         />
     );
@@ -183,5 +189,3 @@ const styles = StyleSheet.create({
     height: 44,
   },
 })
-
-//         renderFooter={() => <Footer navigate={this.props.navigate}/>}

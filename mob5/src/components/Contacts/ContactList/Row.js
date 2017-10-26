@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import Swipeable from 'react-native-swipeable';
 import { FontAwesome } from "react-native-vector-icons";
+import { getToken } from '../../../auth';
 
 
 const styles = StyleSheet.create({
@@ -42,28 +43,58 @@ export default class Row extends Component {
     };
   }
 
-  removeCalendar = () => {
-  };
 
   render(){
     const {currentlyOpenSwipeable} = this.state;
     const { navigate } = this.props.navigate;
     const { data } = this.props;
     let displayName = data.user.email;
-    const { onOpen, onClose } = this.props.itemProps;
+    const { onOpen, onClose, deleteFriend } = this.props.itemProps;
     if(data.user.name && data.user.nickname){
-      displayName = `${data.user.name} ${data.user.nickname}`
+      displayName = `${data.user.name} ${data.user.nickname}   -   ${data.user.email}`
     }
-    const deleteFriend = () => {
-      //refresh ?
-      this.removeCalendar();
+    const removeFriend = () => {
+      return getToken()
+      .then((bulkAccess) => {
+        const objAccess = JSON.parse(bulkAccess);
+        return fetch(`http://another-calendar.herokuapp.com/api/v1/user/contacts/${this.props.data.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            uid: objAccess.uid,
+            client: objAccess.client,
+            expiry: objAccess.expiry,
+            access_token: objAccess.access_token
+          }
+        })
+      })
+      .then((response) => {
+        const responseHeaders = response.headers.map;
+        const responseBody = JSON.parse(response._bodyText);
+        if(responseBody.error){
+          return this.setState({
+            isLoading: false
+          }, function () {
+            alert(JSON.stringify(responseBody.error));
+          });
+        }
+        return this.setState({
+          isLoading: false
+        }, function(){
+          deleteFriend();
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     }
 
     return(
       <Swipeable
         rightButtons={[
           <TouchableOpacity style={[styles.rightSwipeItem, {backgroundColor: 'red'}]}
-            onPress={deleteFriend}
+            onPress={removeFriend}
           >
             <FontAwesome name="trash-o" size={30} color={'white'} />
           </TouchableOpacity>,

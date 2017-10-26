@@ -20,25 +20,18 @@ const styles = StyleSheet.create({
   },
 });
 
-// export default Footer= (props) => (
-//   <View style={styles.container}>
-//     <TouchableOpacity style={styles.buttonContainer}
-//       onPress={() => navigate("Calendar")}>
-//       <Text style={styles.buttonText}> TESTOMGLOL</Text>
-//     </TouchableOpacity>
-//   </View>
-// );
-
 export default class Footer extends React.Component {
   render() {
-    const { navigate } = this.props.navigate;
+    const { refresh } = this.props.itemProps;
+    const action = () => {
+        refresh();
+    };
     return (
-        <View style={styles.container}>
-          <TouchableOpacity style={styles.buttonContainer}
-            onPress={() => navigate("Calendar")}>
-            <Text style={styles.buttonText}> TESTOMGLOL</Text>
-          </TouchableOpacity>
-        </View>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.button} onPress={action}>
+          <Text style={styles.text}>Raffraichir</Text>
+        </TouchableOpacity>
+      </View>
     )
   }
 }

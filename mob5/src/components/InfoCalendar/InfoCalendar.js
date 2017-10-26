@@ -47,7 +47,6 @@ export default class InfoCalendar extends React.Component {
   }
 
   nameOrEmail = () => {
-    console.log(this.state.calendar);
     return 'lol';
     if(this.state.calendar.owner.name){
       this.setState({
@@ -63,7 +62,6 @@ export default class InfoCalendar extends React.Component {
       if(nav.state){
         if(nav.state.params){
           if(nav.state.params.data){
-            console.log('nasfmojazoiefj', nav.state.params.data);
             calendar = nav.state.params.data;
             this.setState({
               calendar,
@@ -74,7 +72,6 @@ export default class InfoCalendar extends React.Component {
       }
     }
     if(calendar){
-      console.log('coucou ?');
     }
   }
   render() {

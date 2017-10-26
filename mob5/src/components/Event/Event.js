@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { StyleSheet, View, Image, Text, KeyboardAvoidingView, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Text, TouchableOpacity } from 'react-native';
 import EventForm from './EventForm';
 
 
@@ -43,13 +43,13 @@ export default class Calendar extends React.Component {
   render() {
     const { navigate } = this.props.navigation;
     return (
-      <KeyboardAvoidingView behavior="padding" style={styles.container}>
+      <ScrollView behavior="padding" style={styles.container}>
       <EventForm navigate={this.props.navigation} />
         <TouchableOpacity style={styles.buttonContainer}
           onPress={() => navigate("Home")}>
           <Text style={styles.buttonText}> Retour</Text>
         </TouchableOpacity>
-      </KeyboardAvoidingView>
+      </ScrollView>
     )
   }
 }

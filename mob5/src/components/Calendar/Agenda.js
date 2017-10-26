@@ -32,28 +32,70 @@ export default class AgendaScreen extends Component {
         if(nav.state.params){
           if(nav.state.params.data){
             calendar = nav.state.params.data;
+            this.setState({calendar});
           }
         }
       }
     }
-    const test = {
-      '2017-10-22': []
-    };
-    test['2017-10-22'].push({
-      name: 'test a moua',
-      height: Math.max(50, Math.floor(Math.random() * 150))
-    });
-    test['2017-10-22'].push({
-      name: 'test en dur',
-      height: Math.max(50, Math.floor(Math.random() * 150))
-    });
-
-    // Si calendar primary alors charger les autres
+    const data = {};
     if(calendar){
-      this.setState({
-        calendar,
-        items: test
-        // items: calendar.events || null
+      return getToken()
+      .then((bulkAccess) => {
+        const objAccess = JSON.parse(bulkAccess);
+        let isOwner = false;
+        if(objAccess.id === calendar.owner.id){
+          isOwner = true;
+        }
+        this.setState({isOwner});
+        return fetch(`http://another-calendar.herokuapp.com/api/v1/user/calendars/${calendar.id}`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            uid: objAccess.uid,
+            client: objAccess.client,
+            expiry: objAccess.expiry,
+            access_token: objAccess.access_token
+          }
+        })
+      })
+      .then((response) => {
+        const responseHeaders = response.headers.map;
+        const responseBody = JSON.parse(response._bodyText);
+        if(responseBody.error){
+          return this.setState({
+            isLoading: false,
+          }, function () {
+            alert(JSON.stringify(responseBody.error));
+          });
+        }
+        responseBody.events.forEach((evt) => {
+          const date = this.timeToString(evt.start_at);
+          if(!data[date]){
+            data[date] = [];
+          }
+          console.log('evt', evt);
+          data[date].push({
+            id: evt.id,
+            title: evt.title,
+            description: evt.description,
+            important: evt.important,
+            start_at: evt.start_at,
+            end_at: evt.end_at,
+            participants: evt.participants,
+            height: 100
+          });
+        })
+        this.setState({
+        })
+        return this.setState({
+          isLoading: false,
+          calendar: responseBody,
+          items: data
+        });
+      })
+      .catch((error) => {
+        console.log(error);
       });
     }
   }
@@ -71,7 +113,7 @@ export default class AgendaScreen extends Component {
       <Agenda
         items={this.state.items}
         loadItemsForMonth={this.loadItems.bind(this)}
-        selected={'2017-10-20'}
+        selected={'2017-10-24'}
         renderItem={this.renderItem.bind(this)}
         renderEmptyDate={this.renderEmptyDate.bind(this)}
         rowHasChanged={this.rowHasChanged.bind(this)}
@@ -97,14 +139,9 @@ export default class AgendaScreen extends Component {
         for (let i = -15; i < 85; i++) {
           const time = day.timestamp + i * 24 * 60 * 60 * 1000;
           const strTime = this.timeToString(time);
-          if (!this.state.items[strTime]) {
-            this.state.items[strTime] = [];
-            const numItems = Math.floor(Math.random() * 5);
-            for (let j = 0; j < numItems; j++) {
-              this.state.items[strTime].push({
-                name: 'Item for ' + strTime,
-                height: Math.max(50, Math.floor(Math.random() * 150))
-              });
+          if(this.state.calendar){
+            if(!this.state.items[strTime]){
+              this.state.items[strTime] = [];
             }
           }
         }
@@ -123,24 +160,35 @@ export default class AgendaScreen extends Component {
       data.item = item;
       return (
         <TouchableOpacity style={styles.button} onPress={() => navigate("EditEvent", {data})}>
-          <View style={[styles.item, {height: item.height}]}><Text>{item.name}</Text></View>
+          <View style={[styles.item, {height: item.height}]}>
+            <Text>{item.title}</Text>
+            <Text>{item.description}</Text>
+          </View>
         </TouchableOpacity>
       );
     }
 
-    renderEmptyDate() {
+    renderEmptyDate(item) {
       const { navigate } = this.props.navigate
       , data = {};
       data.calendar = this.state.calendar;
-      return (
-        <TouchableOpacity style={styles.button} onPress={() => navigate("EditEvent", {data})}>
+      data.item = item;
+      data.calendar = this.state.calendar;
+      if(this.state.isOwner){
+        return (
+          <TouchableOpacity style={styles.button} onPress={() => navigate("EditEvent", {data})}>
+            <View style={styles.emptyDate}><Text>Aucune entrée a cette date la</Text></View>
+          </TouchableOpacity>
+        );
+      } else {
+        return (
           <View style={styles.emptyDate}><Text>Aucune entrée a cette date la</Text></View>
-        </TouchableOpacity>
-      );
+        );
+      }
     }
 
     rowHasChanged(r1, r2) {
-      return r1.name !== r2.name;
+      return r1.title !== r2.title;
     }
 
     timeToString(time) {
